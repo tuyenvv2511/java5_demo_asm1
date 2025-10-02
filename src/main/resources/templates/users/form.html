@@ -1,0 +1,39 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <div class="bg-white p-4 rounded-3 shadow-sm">
+        <h2 th:text="${user.id == null} ? 'Create User' : 'Edit User'">Create/Edit User</h2>
+        <form th:action="@{/users}" method="post" th:object="${user}">
+            <input type="hidden" th:field="*{id}">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Username</label>
+                    <input class="form-control" th:field="*{username}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control" type="email" th:field="*{email}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Password</label>
+                    <input class="form-control" type="password" th:field="*{password}" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Role</label>
+                    <select class="form-control" th:field="*{role}">
+                        <option th:each="role : ${roles}" th:value="${role}" th:text="${role}"></option>
+                    </select>
+                </div>
+                <div class="col-md-6 form-check mt-4">
+                    <input class="form-check-input" type="checkbox" th:field="*{active}">
+                    <label class="form-check-label">Active</label>
+                </div>
+                <div class="col-12 d-flex gap-2 mt-3">
+                    <button class="btn btn-primary" type="submit">Save</button>
+                    <a class="btn btn-secondary" th:href="@{/users}">Back</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</html>

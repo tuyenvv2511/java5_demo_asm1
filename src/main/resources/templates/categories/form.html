@@ -1,0 +1,28 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <div class="bg-white p-4 rounded-3 shadow-sm">
+    <h2 th:text="${category.id == null} ? #{category.create} : #{category.edit}">Create/Edit Category</h2>
+    <form th:action="${category.id == null} ? @{/categories} : @{/categories/{id}/edit(id=${category.id})}" method="post" th:object="${category}">
+        <div class="mb-3">
+            <label th:for="name" class="form-label" th:text="#{category.name}">Name</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" required>
+        </div>
+        <div class="mb-3">
+            <label th:for="slug" class="form-label" th:text="#{category.slug}">Slug</label>
+            <input type="text" class="form-control" id="slug" th:field="*{slug}" required>
+        </div>
+        <div class="mb-3">
+            <label th:for="description" class="form-label" th:text="#{category.description}">Description</label>
+            <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="active" th:field="*{active}">
+            <label class="form-check-label" th:for="active" th:text="#{category.active}">Active</label>
+        </div>
+        <button type="submit" class="btn btn-primary" th:text="#{btn.save}">Save</button>
+        <a th:href="@{/categories}" class="btn btn-secondary" th:text="#{btn.back}">Back</a>
+    </form>
+    </div>
+</section>
+</html>
