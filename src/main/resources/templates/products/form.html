@@ -1,0 +1,63 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section class="bg-white p-4 rounded-3 shadow-sm">
+    <form th:action="@{/products}" method="post" th:object="${product}">
+        <input type="hidden" th:field="*{id}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{product.title}">Title</label>
+                <input class="form-control" th:field="*{title}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{product.price}">Price</label>
+                <input type="number" min="0" step="1000" class="form-control" th:field="*{price}" required>
+            </div>
+            <div class="col-12">
+                <label class="form-label" th:text="#{product.description}">Description</label>
+                <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label" th:text="#{product.imageUrl}">Image URL</label>
+                <input type="url" class="form-control" th:field="*{imageUrl}" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" th:text="#{product.condition}">Condition</label>
+                <select class="form-select" th:field="*{conditionGrade}">
+                    <option th:each="c : ${conditions}" th:value="${c}" th:text="${c}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" th:text="#{product.brand}">Brand</label>
+                <select class="form-select" th:field="*{brand}" required>
+                    <option th:each="b : ${brands}" th:value="${b.id}" th:text="${b.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" th:text="#{product.category}">Category</label>
+                <select class="form-select" th:field="*{category}" required>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Seller</label>
+                <select class="form-select" th:field="*{seller}" required>
+                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
+                </select>
+            </div>
+            <div class="col-12 form-check">
+                <input class="form-check-input" type="checkbox" th:field="*{active}">
+                <label class="form-check-label" th:text="#{product.active}">Active</label>
+            </div>
+            <div class="col-12 d-flex gap-2 mt-3">
+                <button class="btn btn-primary" name="applySuggest" value="false" th:text="#{btn.save}">Save</button>
+                <button class="btn btn-outline-primary" name="applySuggest" value="true" th:text="#{pricing.suggest}">
+                    Apply suggest
+                </button>
+                <a class="btn btn-secondary" th:href="@{/products}" th:text="#{btn.back}">Back</a>
+            </div>
+        </div>
+    </form>
+</section>
+</body>
+</html>

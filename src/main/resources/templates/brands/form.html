@@ -1,0 +1,33 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <div class="bg-white p-4 rounded-3 shadow-sm">
+        <h2 th:text="${brand.id == null} ? 'Tạo thương hiệu' : 'Sửa thương hiệu'">Create/Edit Brand</h2>
+    <form th:action="@{/brands}" method="post" th:object="${brand}">
+        <input type="hidden" th:field="*{id}">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Name</label>
+                <input class="form-control" th:field="*{name}" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Country</label>
+                <input class="form-control" th:field="*{country}">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Slug</label>
+                <input class="form-control" th:field="*{slug}" required>
+            </div>
+            <div class="col-md-6 form-check mt-4">
+                <input class="form-check-input" type="checkbox" th:field="*{active}">
+                <label class="form-check-label">Active</label>
+            </div>
+            <div class="col-12 d-flex gap-2 mt-3">
+                <button class="btn btn-primary" th:text="#{btn.save}">Save</button>
+                <a class="btn btn-secondary" th:href="@{/brands}" th:text="#{btn.back}">Back</a>
+            </div>
+        </div>
+    </form>
+    </div>
+</section>
+</html>
