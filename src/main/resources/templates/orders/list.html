@@ -1,0 +1,182 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <div class="d-flex mb-3">
+        <h3 class="me-auto" th:text="#{order.myOrders}">My Orders</h3>
+    </div>
+
+    <!-- Alert messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${success}">Success message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- My Orders (as buyer) -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0" th:text="#{order.myPurchasedOrders}">My Purchased Orders</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(myOrders)}" class="text-center text-muted py-4">
+                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                <p th:text="#{order.noOrdersYet}">You don't have any orders yet</p>
+                <a th:href="@{/products}" class="btn btn-primary" th:text="#{order.shopNow}">Shop Now</a>
+            </div>
+            
+            <div th:unless="${#lists.isEmpty(myOrders)}" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th th:text="#{order.id}">ID</th>
+                            <th th:text="#{order.product}">Product</th>
+                            <th th:text="#{order.seller}">Seller</th>
+                            <th th:text="#{order.price}">Price</th>
+                            <th th:text="#{order.status}">Status</th>
+                            <th th:text="#{order.createdAt}">Created At</th>
+                            <th th:text="#{product.actions}">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${myOrders}">
+                            <td th:text="${order.id}">#123</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:if="${order.product.imageUrl != null and order.product.imageUrl != ''}" 
+                                         th:src="${order.product.imageUrl}" 
+                                         alt="Product" 
+                                         class="me-2" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <span th:text="${order.product.title}">Product Title</span>
+                                </div>
+                            </td>
+                            <td th:text="${order.seller.username}">Seller</td>
+                            <td th:text="${#numbers.formatInteger(order.orderPrice,3,'POINT')}">4,200,000</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${order.status.name() == 'PENDING'} ? 'bg-warning' : 
+                                                     (${order.status.name() == 'CONFIRMED'} ? 'bg-info' : 
+                                                     (${order.status.name() == 'SHIPPED'} ? 'bg-primary' : 
+                                                     (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
+                                                     (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                      th:text="#{'order.status.' + ${order.status.name().toLowerCase()}}">PENDING</span>
+                            </td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                            <td>
+                                <div th:if="${order.status.name() == 'PENDING' or order.status.name() == 'CONFIRMED'}">
+                                    <form th:action="@{/orders/{id}/cancel(id=${order.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                th:onclick="'return confirm(\'' + #{order.cancelOrderConfirm} + '\')'">
+                                            <span th:text="#{order.cancelOrderBtn}">Cancel Order</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div th:if="${order.status.name() == 'DELIVERED'}">
+                                    <form th:action="@{/orders/{id}/complete(id=${order.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success" 
+                                                th:onclick="'return confirm(\'' + #{order.completeOrderConfirm} + '\')'">
+                                            <span th:text="#{order.completeOrderBtn}">Complete Order</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <span th:unless="${order.status.name() == 'PENDING' or order.status.name() == 'CONFIRMED' or order.status.name() == 'DELIVERED'}" 
+                                      class="text-muted">-</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Sales (as seller) -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0" th:text="#{order.mySoldOrders}">My Sold Orders</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(mySales)}" class="text-center text-muted py-4">
+                <i class="fas fa-store fa-3x mb-3"></i>
+                <p th:text="#{order.noSalesYet}">You don't have any sales yet</p>
+            </div>
+            
+            <div th:unless="${#lists.isEmpty(mySales)}" class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th th:text="#{order.id}">ID</th>
+                            <th th:text="#{order.product}">Product</th>
+                            <th th:text="#{order.buyer}">Buyer</th>
+                            <th th:text="#{order.price}">Price</th>
+                            <th th:text="#{order.status}">Status</th>
+                            <th th:text="#{order.createdAt}">Created At</th>
+                            <th th:text="#{product.actions}">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${mySales}">
+                            <td th:text="${order.id}">#123</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:if="${order.product.imageUrl != null and order.product.imageUrl != ''}" 
+                                         th:src="${order.product.imageUrl}" 
+                                         alt="Product" 
+                                         class="me-2" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <span th:text="${order.product.title}">Product Title</span>
+                                </div>
+                            </td>
+                            <td th:text="${order.buyer.username}">Buyer</td>
+                            <td th:text="${#numbers.formatInteger(order.orderPrice,3,'POINT')}">4,200,000</td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${order.status.name() == 'PENDING'} ? 'bg-warning' : 
+                                                     (${order.status.name() == 'CONFIRMED'} ? 'bg-info' : 
+                                                     (${order.status.name() == 'SHIPPED'} ? 'bg-primary' : 
+                                                     (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
+                                                     (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'))))"
+                                      th:text="#{'order.status.' + ${order.status.name().toLowerCase()}}">PENDING</span>
+                            </td>
+                            <td th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2024 10:00</td>
+                            <td>
+                                <div th:if="${order.status.name() == 'PENDING'}">
+                                    <form th:action="@{/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CONFIRMED">
+                                        <button type="submit" class="btn btn-sm btn-success me-1" th:text="#{order.confirmBtn}">Confirm</button>
+                                    </form>
+                                    <form th:action="@{/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="CANCELLED">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                th:onclick="'return confirm(\'' + #{order.rejectOrderConfirm} + '\')'">
+                                            <span th:text="#{order.rejectBtn}">Reject</span>
+                                        </button>
+                                    </form>
+                                </div>
+                                <div th:if="${order.status.name() == 'CONFIRMED'}">
+                                    <form th:action="@{/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="SHIPPED">
+                                        <button type="submit" class="btn btn-sm btn-primary" th:text="#{order.shippedBtn}">Shipped</button>
+                                    </form>
+                                </div>
+                                <div th:if="${order.status.name() == 'SHIPPED'}">
+                                    <form th:action="@{/orders/{id}/status(id=${order.id})}" method="post" class="d-inline">
+                                        <input type="hidden" name="status" value="DELIVERED">
+                                        <button type="submit" class="btn btn-sm btn-success" th:text="#{order.completeBtn}">Complete</button>
+                                    </form>
+                                </div>
+                                <span th:if="${order.status.name() == 'DELIVERED' or order.status.name() == 'CANCELLED'}" 
+                                      class="text-muted">-</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

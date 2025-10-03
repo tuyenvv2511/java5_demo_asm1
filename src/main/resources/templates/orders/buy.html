@@ -1,0 +1,76 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section class="bg-white p-4 rounded-3 shadow-sm">
+    <div class="row">
+        <div class="col-md-6">
+            <h3 th:text="#{order.buyProductTitle}">Buy Product</h3>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${product.title}">Product Title</h5>
+                    <div class="mb-3">
+                        <img th:if="${product.imageUrl != null and product.imageUrl != ''}" 
+                             th:src="${product.imageUrl}" 
+                             alt="Product Image" 
+                             class="img-fluid rounded" 
+                             style="max-height: 300px;">
+                        <div th:unless="${product.imageUrl != null and product.imageUrl != ''}" 
+                             class="bg-light d-flex align-items-center justify-content-center" 
+                             style="height: 300px; border: 1px solid #dee2e6;">
+                            <i class="fas fa-image text-muted fa-3x"></i>
+                        </div>
+                    </div>
+                    <p class="card-text" th:text="${product.description}">Description</p>
+                    <div th:if="${product.hasActivePromotion()}">
+                        <p><strong th:text="#{order.originalPrice}">Original Price</strong>: <span class="text-decoration-line-through text-muted" th:text="${#numbers.formatInteger(product.price,3,'POINT')}">4,200,000</span> VNĐ</p>
+                        <p><strong th:text="#{order.discountedPrice}">Discounted Price</strong>: <span class="text-danger fw-bold" th:text="${#numbers.formatInteger(product.discountedPrice,3,'POINT')}">3,500,000</span> VNĐ</p>
+                        <span class="badge bg-danger">Sale</span>
+                    </div>
+                    <div th:unless="${product.hasActivePromotion()}">
+                        <p><strong th:text="#{order.price}">Price</strong>: <span th:text="${#numbers.formatInteger(product.price,3,'POINT')}">4,200,000</span> VNĐ</p>
+                    </div>
+                    <p><strong th:text="#{order.seller}">Seller</strong>: <span th:text="${product.seller.username}">Seller</span></p>
+                    <p><strong th:text="#{order.condition}">Condition</strong>: <span th:text="#{'condition.' + ${product.conditionGrade}}">LIKE_NEW</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <h3 th:text="#{order.orderInfoTitle}">Order Information</h3>
+            <form th:action="@{/orders/buy/{id}(id=${product.id})}" method="post">
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{order.suggestedPrice}">Suggested Price</label>
+                    <input type="number" class="form-control" name="orderPrice" 
+                           th:value="${product.hasActivePromotion() ? product.discountedPrice : product.price}" 
+                           min="0" step="1000" required>
+                    <div class="form-text">
+                        <span th:if="${product.hasActivePromotion()}" th:text="#{order.promotionApplied}">Promotion price has been applied. You can suggest a different price.</span>
+                        <span th:unless="${product.hasActivePromotion()}" th:text="#{order.canSuggestPrice}">You can suggest a different price from the listed price</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{order.notes}">Notes (optional)</label>
+                    <textarea class="form-control" name="notes" rows="3" 
+                              th:placeholder="#{order.notesPlaceholder}"></textarea>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6 th:text="#{order.importantNotes}">Important Notes</h6>
+                    <ul class="mb-0">
+                        <li th:text="#{order.orderWillBeSent}">Order will be sent to seller for confirmation</li>
+                        <li th:text="#{order.canCancelBeforeConfirm}">You can cancel the order before seller confirms</li>
+                        <li th:text="#{order.contactSeller}">Please contact the seller via chat for further discussion</li>
+                    </ul>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success" th:text="#{order.placeOrder}">Place Order</button>
+                    <a th:href="@{/products}" class="btn btn-secondary" th:text="#{order.back}">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+</body>
+</html>

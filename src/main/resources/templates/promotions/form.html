@@ -1,0 +1,98 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section class="bg-white p-4 rounded-3 shadow-sm">
+    <h2 th:text="#{promotion.createNew}">Create New Promotion</h2>
+    
+    <!-- Alert messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${error}">Error message</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <form th:action="@{/promotions/create}" method="post">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{promotion.product}">Product</label>
+                <select class="form-select" name="productId" required>
+                    <option value="" th:text="#{promotion.selectProduct}">Select Product</option>
+                    <option th:each="p : ${products}" 
+                            th:value="${p.id}" 
+                            th:text="${p.title + ' - ' + #numbers.formatInteger(p.price,3,'POINT') + ' VNĐ'}">
+                        Product Title - 4,200,000 VNĐ
+                    </option>
+                </select>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{promotion.promotionType}">Promotion Type</label>
+                <select class="form-select" name="type" required>
+                    <option th:each="type : ${promotionTypes}" 
+                            th:value="${type}" 
+                            th:text="${type.name() == 'PERCENTAGE'} ? #{promotion.percentageDiscount} : #{promotion.fixedDiscount}">
+                        Giảm theo phần trăm
+                    </option>
+                </select>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{promotion.discountValue}">Discount Value</label>
+                <input type="number" class="form-control" name="discountValue" 
+                       min="0" step="0.01" required>
+                <div class="form-text">
+                    <span class="text-info" th:text="#{promotion.percentageHelp}">Percentage</span>: <span th:text="#{promotion.percentageExample}">Enter number from 1-100 (e.g.: 20 = 20%)</span><br>
+                    <span class="text-warning" th:text="#{promotion.amountHelp}">Amount</span>: <span th:text="#{promotion.amountExample}">Enter discount amount (e.g.: 500000 = 500,000 VND)</span>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{promotion.startDate}">Start Date</label>
+                <input type="date" class="form-control" name="startDate" required>
+            </div>
+            
+            <div class="col-md-6">
+                <label class="form-label" th:text="#{promotion.endDate}">End Date</label>
+                <input type="date" class="form-control" name="endDate" required>
+            </div>
+            
+            <div class="col-12">
+                <label class="form-label" th:text="#{promotion.description}">Promotion Description (optional)</label>
+                <textarea class="form-control" name="description" rows="3" 
+                          th:placeholder="#{promotion.descriptionPlaceholder}"></textarea>
+            </div>
+            
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <h6 th:text="#{promotion.importantNotes}">Important Notes</h6>
+                    <ul class="mb-0">
+                        <li th:text="#{promotion.autoDisplay}">Promotion will automatically display on product list</li>
+                        <li th:text="#{promotion.priceApplied}">Promotion price will be applied when purchasing</li>
+                        <li th:text="#{promotion.canDeactivate}">You can deactivate the promotion anytime</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="col-12 d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-success" th:text="#{promotion.createBtn}">Create Promotion</button>
+                <a th:href="@{/promotions}" class="btn btn-secondary" th:text="#{promotion.back}">Back</a>
+            </div>
+        </div>
+    </form>
+</section>
+
+<script>
+    // Set default dates
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        
+        const nextWeek = new Date(today);
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        
+        document.querySelector('input[name="startDate"]').value = tomorrow.toISOString().split('T')[0];
+        document.querySelector('input[name="endDate"]').value = nextWeek.toISOString().split('T')[0];
+    });
+</script>
+</body>
+</html>
