@@ -2,31 +2,31 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
 <section th:fragment="content">
     <div class="bg-white p-4 rounded-3 shadow-sm">
-        <h2 th:text="${sale.id == null} ? 'Create Sale' : 'Edit Sale'">Create/Edit Sale</h2>
+        <h2 th:text="${sale.id == null} ? #{sale.create} : #{sale.edit}">Create/Edit Sale</h2>
         <form th:action="@{/sales}" method="post" th:object="${sale}">
             <input type="hidden" th:field="*{id}">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Product</label>
+                    <label class="form-label" th:text="#{sale.product}">Product</label>
                     <select class="form-control" th:field="*{product.id}">
-                        <option value="">Select Product</option>
+                        <option value="" th:text="#{sale.selectProduct}">Select Product</option>
                         <option th:each="p : ${products}" th:value="${p.id}" th:text="${p.title}"></option>
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Buyer</label>
+                    <label class="form-label" th:text="#{sale.buyer}">Buyer</label>
                     <select class="form-control" th:field="*{buyer.id}">
-                        <option value="">Select Buyer</option>
+                        <option value="" th:text="#{sale.selectBuyer}">Select Buyer</option>
                         <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
                     </select>
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">Sold Price</label>
+                    <label class="form-label" th:text="#{sale.soldPrice}">Sold Price</label>
                     <input class="form-control" type="number" th:field="*{soldPrice}" step="0.01" required>
                 </div>
                 <div class="col-12 d-flex gap-2 mt-3">
-                    <button class="btn btn-primary" type="submit">Save</button>
-                    <a class="btn btn-secondary" th:href="@{/sales}">Back</a>
+                    <button class="btn btn-primary" type="submit" th:text="#{btn.save}">Save</button>
+                    <a class="btn btn-secondary" th:href="@{/sales}" th:text="#{btn.back}">Back</a>
                 </div>
             </div>
         </form>

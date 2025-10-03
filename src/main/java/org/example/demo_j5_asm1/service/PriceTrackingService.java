@@ -9,6 +9,8 @@ import org.example.demo_j5_asm1.entity.PriceHistory;
 import org.example.demo_j5_asm1.entity.Product;
 import org.example.demo_j5_asm1.repository.FavoriteRepository;
 import org.example.demo_j5_asm1.repository.PriceHistoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,14 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PriceTrackingService {
+    
+    private static final Logger log = LoggerFactory.getLogger(PriceTrackingService.class);
+    
+    // Constants for price change reasons
+    private static final String REASON_PRICE_UPDATE = "REASON_PRICE_UPDATE";
+    
+    // Message templates for logging
+    private static final String PRICE_ALERT_MESSAGE = "Price Alert: Product {} dropped to {} (Alert was set for {})";
     
     private final PriceHistoryRepository priceHistoryRepository;
     private final FavoriteRepository favoriteRepository;
@@ -31,7 +41,7 @@ public class PriceTrackingService {
                 .product(product)
                 .price(newPrice)
                 .previousPrice(previousPrice)
-                .changeReason("REASON_PRICE_UPDATE")
+                .changeReason(REASON_PRICE_UPDATE)
                 .build();
                 
             priceHistoryRepository.save(priceHistory);
@@ -59,8 +69,10 @@ public class PriceTrackingService {
         favorite.setLastAlertSent(LocalDateTime.now());
         favoriteRepository.save(favorite);
         
-        System.out.println("Price Alert: Product " + favorite.getProduct().getTitle() + 
-                          " dropped to " + currentPrice + " (Alert was set for " + favorite.getAlertPrice() + ")");
+        log.info(PRICE_ALERT_MESSAGE, 
+                favorite.getProduct().getTitle(), 
+                currentPrice, 
+                favorite.getAlertPrice());
     }
     
     public List<PriceHistory> getPriceHistory(Product product) {
