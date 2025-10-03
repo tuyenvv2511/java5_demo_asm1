@@ -2,18 +2,18 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
 <section th:fragment="content">
     <div class="d-flex mb-3">
-        <h3 class="me-auto">Sales</h3>
-        <a class="btn btn-success" th:href="@{/sales/create}">Create</a>
+        <h3 class="me-auto" th:text="#{nav.sales}">Sales</h3>
+        <a class="btn btn-success" th:href="@{/sales/create}" th:text="#{btn.create}">Create</a>
     </div>
     <table class="table table-striped table-hover bg-white shadow-sm">
         <thead>
         <tr>
-            <th>ID</th>
-            <th>Product</th>
-            <th>Buyer</th>
-            <th>Seller</th>
-            <th>Price</th>
-            <th>Sold Date</th>
+            <th th:text="#{sale.id}">ID</th>
+            <th th:text="#{sale.product}">Product</th>
+            <th th:text="#{sale.buyer}">Buyer</th>
+            <th th:text="#{sale.seller}">Seller</th>
+            <th th:text="#{sale.price}">Price</th>
+            <th th:text="#{sale.soldDate}">Sold Date</th>
             <th></th>
         </tr>
         </thead>
@@ -26,9 +26,9 @@
             <td th:text="${s.soldPrice != null ? #numbers.formatInteger(s.soldPrice,3,'POINT') : '-'}">1,000,000</td>
             <td th:text="${s.soldAt != null ? #temporals.format(s.soldAt, 'dd/MM/yyyy HH:mm') : '-'}">02/10/2025 15:20</td>
             <td class="text-end">
-                <a th:href="@{|/sales/${s.id}/edit|}" class="btn btn-sm btn-primary">Edit</a>
+                <a th:href="@{|/sales/${s.id}/edit|}" class="btn btn-sm btn-primary" th:text="#{btn.edit}">Edit</a>
                 <form th:action="@{|/sales/${s.id}/delete|}" method="post" class="d-inline">
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">
+                    <button class="btn btn-sm btn-danger" th:text="#{btn.delete}" onclick="return confirm('Delete?')">
                         Delete
                     </button>
                 </form>

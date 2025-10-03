@@ -1,5 +1,6 @@
 package org.example.demo_j5_asm1.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,4 +39,10 @@ public class Favorite {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+    
+    // Price alert features inspired by SNKRDUNK
+    private BigDecimal alertPrice; // Price threshold for alerts
+    @Builder.Default
+    private Boolean priceAlertEnabled = false; // Enable/disable price alerts
+    private LocalDateTime lastAlertSent; // Last time alert was sent
 }

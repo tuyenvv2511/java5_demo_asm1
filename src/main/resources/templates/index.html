@@ -19,13 +19,14 @@
         <div class="d-flex gap-2">
             <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=vi)}">VI</a>
             <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=en)}">EN</a>
+            <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=ja)}">JA</a>
         </div>
     </div>
 </nav>
 <main class="container my-4">
     <div class="p-5 bg-white rounded-3 shadow-sm">
         <h1 class="mb-3" th:text="#{app.title}">CollectX</h1>
-        <p class="lead">Minimal MVP. Go to <a th:href="@{/products}">Products</a>.</p>
+        <p class="lead">Welcome to The Collect X <a th:href="@{/products}">Products</a>.</p>
     </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -25,7 +25,7 @@
             <input class="form-control" name="q" th:value="${q}" th:placeholder="#{search.placeholder}">
         </div>
         <div class="col-auto">
-            <button class="btn btn-primary">Filter</button>
+            <button class="btn btn-primary" th:text="#{filter.button}">Filter</button>
         </div>
     </form>
 
@@ -39,7 +39,8 @@
                 <th th:text="#{product.condition}">Condition</th>
                 <th th:text="#{product.brand}">Brand</th>
                 <th th:text="#{product.category}">Category</th>
-                <th>Seller</th>
+                <th th:text="#{product.seller}">Seller</th>
+                <th th:text="#{verification.status}">Verification</th>
                 <th th:text="#{product.actions}">Actions</th>
             </tr>
             </thead>
@@ -53,10 +54,13 @@
                        onclick="openChat(this)">[[#{chat.join}]]</a>
                 </td>
                 <td th:text="${#numbers.formatInteger(p.price,3,'POINT')}">4,200,000</td>
-                <td th:text="${p.conditionGrade}">LIKE_NEW</td>
+                <td th:text="#{'condition.' + ${p.conditionGrade}}">LIKE_NEW</td>
                 <td th:text="${p.brand != null ? p.brand.name : '-'}">Nike</td>
                 <td th:text="${p.category != null ? p.category.name : '-'}">Sneaker</td>
                 <td th:text="${p.seller != null ? p.seller.username : '-'}">Seller</td>
+                <td>
+                    <span class="badge bg-warning" th:text="Pending">Pending</span>
+                </td>
                 <td class="text-end">
                     <a th:href="@{|/products/${p.id}/edit|}" class="btn btn-sm btn-primary"
                        th:text="#{btn.edit}">Edit</a>
