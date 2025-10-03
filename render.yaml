@@ -29,3 +29,4 @@ services:
         value: postgres
       - key: POSTGRES_PASSWORD
         generateValue: true
+

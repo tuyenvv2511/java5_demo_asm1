@@ -44,6 +44,9 @@ public class Message {
     @Column(nullable = false)
     private String content;
 
+    @Column(name = "sender_name")
+    private String senderName;
+
     @CreationTimestamp
     private LocalDateTime sentAt;
 }

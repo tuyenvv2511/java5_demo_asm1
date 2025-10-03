@@ -5,8 +5,33 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ddeeab32-5e90-4029-bf6b-b984108e70ee" name="Changes" comment="done demo asm1 j5">
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/service/FileUploadService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README-DEPLOYMENT.md" beforeDir="false" afterPath="$PROJECT_DIR$/README-DEPLOYMENT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/render.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/render.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/config/DataLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/config/DataLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ChatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ChatController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/MessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/MessageController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ProductController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ProductSpecs.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/ProductSpecs.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/SaleController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/controller/SaleController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/entity/Message.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/entity/Message.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/entity/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/entity/Product.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/repository/ProductRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/demo_j5_asm1/repository/ProductRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application-prod.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application-prod.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/i18n/messages_en.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/i18n/messages_en.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/i18n/messages_ja.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/i18n/messages_ja.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/i18n/messages_vi.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/i18n/messages_vi.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/brands/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/brands/form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/brands/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/brands/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/categories/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/categories/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/layout.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/layout.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/products/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/products/form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/products/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/products/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/sales/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/sales/list.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/templates/users/list.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/templates/users/list.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +172,8 @@
       <workItem from="1759392601911" duration="3547000" />
       <workItem from="1759423306940" duration="3824000" />
       <workItem from="1759474476429" duration="2178000" />
-      <workItem from="1759490987001" duration="2891000" />
+      <workItem from="1759490987001" duration="4278000" />
+      <workItem from="1759502915448" duration="9124000" />
     </task>
     <task id="LOCAL-00001" summary="done demo asm1 j5">
       <option name="closed" value="true" />
@@ -205,7 +231,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759492633746</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="done demo asm1 j5">
+      <option name="closed" value="true" />
+      <created>1759494001975</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1759494001975</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

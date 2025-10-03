@@ -22,11 +22,11 @@
                     <td th:text="${c.name}"></td>
                     <td th:text="${c.slug}"></td>
                     <td th:text="${c.description}"></td>
-                    <td><span th:class="${c.active} ? 'badge bg-success' : 'badge bg-danger'" th:text="${c.active} ? 'Yes' : 'No'"></span></td>
+                    <td><span th:class="${c.active} ? 'badge bg-success' : 'badge bg-danger'" th:text="${c.active} ? #{category.yes} : #{category.no}"></span></td>
                     <td>
                         <a th:href="@{/categories/{id}/edit(id=${c.id})}" class="btn btn-sm btn-outline-primary" th:text="#{btn.edit}">Edit</a>
                         <form th:action="@{/categories/{id}/delete(id=${c.id})}" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{btn.delete}" onclick="return confirm('Are you sure?')">Delete</button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger" th:text="#{btn.delete}" th:onclick="'return confirm(\'' + #{product.areYouSure} + '\')'">Delete</button>
                         </form>
                     </td>
                 </tr>

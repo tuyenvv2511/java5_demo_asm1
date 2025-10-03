@@ -2,37 +2,35 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
 <section th:fragment="content">
     <div class="d-flex mb-3">
-        <h3 class="me-auto" th:text="#{nav.sales}">Sales</h3>
-        <a class="btn btn-success" th:href="@{/sales/create}" th:text="#{btn.create}">Create</a>
+        <h3 class="me-auto" th:text="#{nav.sales}">Lịch sử</h3>
     </div>
     <table class="table table-striped table-hover bg-white shadow-sm">
         <thead>
         <tr>
-            <th th:text="#{sale.id}">ID</th>
-            <th th:text="#{sale.product}">Product</th>
-            <th th:text="#{sale.buyer}">Buyer</th>
-            <th th:text="#{sale.seller}">Seller</th>
-            <th th:text="#{sale.price}">Price</th>
-            <th th:text="#{sale.soldDate}">Sold Date</th>
-            <th></th>
+            <th th:text="#{order.id}">ID</th>
+            <th th:text="#{order.product}">Product</th>
+            <th th:text="#{order.buyer}">Buyer</th>
+            <th th:text="#{order.seller}">Seller</th>
+            <th th:text="#{order.price}">Price</th>
+            <th th:text="#{order.status}">Status</th>
+            <th th:text="#{order.createdAt}">Created At</th>
+            <th th:text="#{order.completedAt}">Completed At</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="s : ${sales}">
-            <td th:text="${s.id}">1</td>
-            <td th:text="${s.product != null ? s.product.title : '-'}">Product Title</td>
-            <td th:text="${s.buyer != null ? s.buyer.username : '-'}">buyer1</td>
-            <td th:text="${s.seller != null ? s.seller.username : '-'}">seller1</td>
-            <td th:text="${s.soldPrice != null ? #numbers.formatInteger(s.soldPrice,3,'POINT') : '-'}">1,000,000</td>
-            <td th:text="${s.soldAt != null ? #temporals.format(s.soldAt, 'dd/MM/yyyy HH:mm') : '-'}">02/10/2025 15:20</td>
-            <td class="text-end">
-                <a th:href="@{|/sales/${s.id}/edit|}" class="btn btn-sm btn-primary" th:text="#{btn.edit}">Edit</a>
-                <form th:action="@{|/sales/${s.id}/delete|}" method="post" class="d-inline">
-                    <button class="btn btn-sm btn-danger" th:text="#{btn.delete}" onclick="return confirm('Delete?')">
-                        Delete
-                    </button>
-                </form>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}">1</td>
+            <td th:text="${order.product != null ? order.product.title : '-'}">Product Title</td>
+            <td th:text="${order.buyer != null ? order.buyer.username : '-'}">buyer1</td>
+            <td th:text="${order.seller != null ? order.seller.username : '-'}">seller1</td>
+            <td th:text="${order.orderPrice != null ? #numbers.formatInteger(order.orderPrice,3,'POINT') : '-'}">1,000,000</td>
+            <td>
+                <span class="badge" 
+                      th:classappend="${order.status.name() == 'COMPLETED'} ? 'bg-success' : 'bg-danger'"
+                      th:text="#{'order.status.' + ${order.status.name().toLowerCase()}}">COMPLETED</span>
             </td>
+            <td th:text="${order.createdAt != null ? #temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">02/10/2025 15:20</td>
+            <td th:text="${order.completedAt != null ? #temporals.format(order.completedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
         </tr>
         </tbody>
     </table>

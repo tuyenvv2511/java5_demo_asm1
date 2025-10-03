@@ -7,7 +7,7 @@ import org.example.demo_j5_asm1.repository.MessageRepository;
 import org.example.demo_j5_asm1.repository.ProductRepository;
 import org.example.demo_j5_asm1.repository.UserRepository;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import lombok.Data;
@@ -19,24 +19,27 @@ public class ChatController {
     private final MessageRepository messageRepo;
     private final ProductRepository productRepo;
     private final UserRepository userRepo;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send")
-    @SendTo("/topic/chat.{productId}")
-    public ChatMessage send(ChatMessage msg) {
+    public void send(ChatMessage msg) {
         // Save to db
         Product product = productRepo.findById(msg.getProductId()).orElse(null);
-        User sender = userRepo.findById(msg.getSenderId()).orElse(null);
         User receiver = product != null ? product.getSeller() : null;
         if (product != null) {
             Message message = Message.builder()
-                    .sender(sender)
+                    .sender(null) // Không cần sender vì chỉ dùng nickname
                     .receiver(receiver)
                     .product(product)
                     .content(msg.getContent())
+                    .senderName(msg.getSender()) // Lưu nickname
                     .build();
             messageRepo.save(message);
+            
+            // Send to specific product chat room
+            String destination = "/topic/chat." + msg.getProductId();
+            messagingTemplate.convertAndSend(destination, msg);
         }
-        return msg;
     }
 
     @Data

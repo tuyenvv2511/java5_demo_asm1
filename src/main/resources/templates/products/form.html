@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body th:replace="~{layout :: layout(content=~{::section})}">
 <section class="bg-white p-4 rounded-3 shadow-sm">
-    <form th:action="@{/products}" method="post" th:object="${product}">
+    <form th:action="@{/products}" method="post" th:object="${product}" enctype="multipart/form-data">
         <input type="hidden" th:field="*{id}">
         <div class="row g-3">
             <div class="col-md-6">
@@ -18,8 +18,25 @@
                 <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
             </div>
             <div class="col-12">
-                <label class="form-label" th:text="#{product.imageUrl}">Image URL</label>
-                <input type="url" class="form-control" th:field="*{imageUrl}" placeholder="https://example.com/image.jpg">
+                <label class="form-label" th:text="#{product.image}">Product Image</label>
+                <input type="file" class="form-control" name="imageFile" accept="image/*" id="imageFile">
+                <div class="form-text" th:text="#{product.imageHelp}">Choose image from your computer (JPG, PNG, GIF - maximum 10MB)</div>
+                
+                <!-- Display current image if exists -->
+                <div th:if="${product.imageUrl != null and product.imageUrl != ''}" class="mt-3">
+                    <label class="form-label" th:text="#{product.currentImage}">Current Image:</label>
+                    <div>
+                        <img th:src="${product.imageUrl}" alt="Product Image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
+                
+                <!-- Preview new image -->
+                <div id="imagePreview" class="mt-3" style="display: none;">
+                    <label class="form-label" th:text="#{product.newImage}">New Image:</label>
+                    <div>
+                        <img id="previewImg" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label" th:text="#{product.condition}">Condition</label>
@@ -40,7 +57,7 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Seller</label>
+                <label class="form-label" th:text="#{product.seller}">Seller</label>
                 <select class="form-select" th:field="*{seller}" required>
                     <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
                 </select>
@@ -59,5 +76,22 @@
         </div>
     </form>
 </section>
+
+<script>
+    // Preview hình ảnh khi chọn file
+    document.getElementById('imageFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('imagePreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            document.getElementById('imagePreview').style.display = 'none';
+        }
+    });
+</script>
 </body>
 </html>

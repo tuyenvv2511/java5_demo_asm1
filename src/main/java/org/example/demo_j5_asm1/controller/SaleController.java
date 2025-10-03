@@ -1,6 +1,10 @@
 package org.example.demo_j5_asm1.controller;
 
+import java.util.List;
+
+import org.example.demo_j5_asm1.entity.Order;
 import org.example.demo_j5_asm1.entity.Sale;
+import org.example.demo_j5_asm1.repository.OrderRepository;
 import org.example.demo_j5_asm1.repository.ProductRepository;
 import org.example.demo_j5_asm1.repository.SaleRepository;
 import org.example.demo_j5_asm1.repository.UserRepository;
@@ -23,17 +27,22 @@ public class SaleController {
     private final SaleRepository saleRepo;
     private final ProductRepository productRepo;
     private final UserRepository userRepo;
+    private final OrderRepository orderRepo;
 
     @GetMapping
     public String list(Model model) {
-        model.addAttribute("sales", saleRepo.findAll());
+        // Hiển thị lịch sử đơn hàng đã hoàn tất hoặc bị hủy
+        List<Order> completedOrders = orderRepo.findByStatusInOrderByCreatedAtDesc(
+            List.of(Order.OrderStatus.COMPLETED, Order.OrderStatus.CANCELLED)
+        );
+        model.addAttribute("orders", completedOrders);
         return "sales/list";
     }
 
     @GetMapping("/create")
     public String create(Model model) {
         model.addAttribute("sale", new Sale());
-        model.addAttribute("products", productRepo.findAll());
+        model.addAttribute("products", productRepo.findByActiveTrue());
         model.addAttribute("users", userRepo.findAll());
         return "sales/form";
     }
@@ -41,7 +50,7 @@ public class SaleController {
     @PostMapping
     public String save(@Valid @ModelAttribute("sale") Sale s, BindingResult br, Model model) {
         if (br.hasErrors()) {
-            model.addAttribute("products", productRepo.findAll());
+            model.addAttribute("products", productRepo.findByActiveTrue());
             model.addAttribute("users", userRepo.findAll());
             return "sales/form";
         }
@@ -69,7 +78,7 @@ public class SaleController {
     public String edit(@PathVariable Long id, Model model) {
         var s = saleRepo.findById(id).orElseThrow();
         model.addAttribute("sale", s);
-        model.addAttribute("products", productRepo.findAll());
+        model.addAttribute("products", productRepo.findByActiveTrue());
         model.addAttribute("users", userRepo.findAll());
         return "sales/form";
     }

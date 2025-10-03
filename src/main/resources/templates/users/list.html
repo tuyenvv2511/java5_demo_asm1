@@ -21,14 +21,14 @@
             <td th:text="${u.id}">1</td>
             <td th:text="${u.username}">user1</td>
             <td th:text="${u.email}">user@example.com</td>
-            <td th:text="${u.role}">USER</td>
+            <td th:text="#{'user.role.' + ${u.role.name().toLowerCase()}}">USER</td>
             <td>
                 <span th:text="${u.active} ? '✔' : '✖'">✔</span>
             </td>
             <td class="text-end">
                 <a th:href="@{|/users/${u.id}/edit|}" class="btn btn-sm btn-primary" th:text="#{btn.edit}">Edit</a>
                 <form th:action="@{|/users/${u.id}/delete|}" method="post" class="d-inline">
-                    <button class="btn btn-sm btn-danger" th:text="#{btn.delete}" onclick="return confirm('Delete?')">
+                    <button class="btn btn-sm btn-danger" th:text="#{btn.delete}" th:onclick="'return confirm(\'' + #{product.deleteConfirm} + '\')'">
                         Delete
                     </button>
                 </form>

@@ -17,15 +17,17 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item"><a class="nav-link" th:href="@{/products}" th:text="#{nav.products}">Products</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/orders}" th:text="#{nav.orders}">Orders</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/promotions}" th:text="#{nav.promotions}">Promotions</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/brands}" th:text="#{nav.brands}">Brands</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/categories}" th:text="#{nav.categories}">Categories</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/users}" th:text="#{nav.users}">Users</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/sales}" th:text="#{nav.sales}">Sales</a></li>
             </ul>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-light btn-sm" th:href="@{''(lang=vi)}">VI</a>
-                <a class="btn btn-outline-light btn-sm" th:href="@{''(lang=en)}">EN</a>
-                <a class="btn btn-outline-light btn-sm" th:href="@{''(lang=ja)}">JA</a>
+                <a class="btn btn-outline-light btn-sm" th:href="@{/?(lang=vi)}">VI</a>
+                <a class="btn btn-outline-light btn-sm" th:href="@{/?(lang=en)}">EN</a>
+                <a class="btn btn-outline-light btn-sm" th:href="@{/?(lang=ja)}">JA</a>
             </div>
         </div>
     </div>  
