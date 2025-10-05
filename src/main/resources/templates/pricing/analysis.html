@@ -1,0 +1,242 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/pricing/dashboard}">AI Pricing</a></li>
+            <li class="breadcrumb-item active" th:text="${product.title}">Product Analysis</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex mb-3">
+        <h3 class="me-auto">
+            🤖 <span th:text="#{pricing.analysis.title}">Phân tích AI cho</span> 
+            <span th:text="${product.title}">Product Title</span>
+        </h3>
+        <a th:href="@{/products/{id}/edit(id=${product.id})}" class="btn btn-primary" sec:authorize="hasRole('SELLER')">
+            <i class="fas fa-edit"></i> Chỉnh sửa
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin sản phẩm -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📦 Thông tin sản phẩm</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img th:if="${product.imageUrl != null}" 
+                             th:src="${product.imageUrl}" 
+                             class="img-fluid rounded" 
+                             style="max-height: 200px;">
+                    </div>
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Tiêu đề:</strong></td>
+                            <td th:text="${product.title}">Product Title</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Thương hiệu:</strong></td>
+                            <td th:text="${product.brand.name}">Brand</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Danh mục:</strong></td>
+                            <td th:text="${product.category.name}">Category</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tình trạng:</strong></td>
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${product.conditionGrade.name() == 'NEW'} ? 'bg-success' : 
+                                                     (${product.conditionGrade.name() == 'LIKE_NEW'} ? 'bg-info' : 
+                                                     (${product.conditionGrade.name() == 'GOOD'} ? 'bg-warning' : 'bg-secondary'))"
+                                      th:text="${product.conditionGrade.name()}">LIKE_NEW</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Giá hiện tại:</strong></td>
+                            <td>
+                                <strong class="text-primary" th:text="${#numbers.formatInteger(product.price,3,'POINT')}">4,200,000</strong> VNĐ
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phân tích AI -->
+        <div class="col-md-8">
+            <!-- Kết quả phân tích chính -->
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        🎯 <span th:text="#{pricing.analysis.result}">Kết quả phân tích AI</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h4 class="text-success" th:text="${#numbers.formatInteger(analysis.suggestedPrice,3,'POINT')}">4,100,000</h4>
+                                <p class="mb-0">💰 Giá gợi ý AI</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <div class="progress mx-auto" style="width: 100px; height: 100px;">
+                                    <div class="progress-bar" 
+                                         th:classappend="${analysis.confidence >= 80} ? 'bg-success' : 
+                                                        (${analysis.confidence >= 60} ? 'bg-warning' : 'bg-danger')"
+                                         th:style="'width: ' + ${analysis.confidence} + '%'"
+                                         role="progressbar">
+                                    </div>
+                                </div>
+                                <p class="mt-2 mb-0">🎯 <span th:text="#{pricing.confidence.title}">Độ tin cậy</span>: <strong th:text="${analysis.confidence} + '%'">85%</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- So sánh giá -->
+                    <div class="mt-4">
+                        <h6>📊 So sánh giá:</h6>
+                        <div class="row">
+                            <div class="col-4 text-center">
+                                <div class="border rounded p-2">
+                                    <strong th:text="${#numbers.formatInteger(analysis.currentPrice,3,'POINT')}">4,200,000</strong>
+                                    <br><small>Giá hiện tại</small>
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="border rounded p-2 bg-light">
+                                    <strong th:text="${#numbers.formatInteger(analysis.suggestedPrice,3,'POINT')}">4,100,000</strong>
+                                    <br><small>Giá gợi ý AI</small>
+                                </div>
+                            </div>
+                            <div class="col-4 text-center">
+                                <div class="border rounded p-2" 
+                                     th:classappend="${analysis.suggestedPrice.compareTo(analysis.currentPrice) < 0} ? 'bg-danger text-white' : 'bg-success text-white'">
+                                    <strong th:text="${analysis.suggestedPrice.compareTo(analysis.currentPrice) < 0 ? '-' : '+'} + 
+                                                         ${#numbers.formatInteger(analysis.suggestedPrice.subtract(analysis.currentPrice).abs(),3,'POINT')}">-100,000</strong>
+                                    <br><small>Chênh lệch</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Xu hướng thị trường -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="mb-0">📈 Xu hướng thị trường</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h5 th:text="${analysis.trendIcon}">📈</h5>
+                                <p class="mb-0">
+                                    <strong th:text="${analysis.trendText}">Đang tăng</strong>
+                                    <br><small class="text-muted">Xu hướng 30 ngày gần đây</small>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <h5 th:text="${analysis.salesCount}">5</h5>
+                                <p class="mb-0">
+                                    <strong>Giao dịch</strong>
+                                    <br><small class="text-muted">Trong 30 ngày qua</small>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Giá trung bình theo giai đoạn -->
+                    <div class="mt-3">
+                        <h6>📊 Giá trung bình theo giai đoạn:</h6>
+                        <div class="row">
+                            <div class="col-6 text-center">
+                                <div class="border rounded p-2">
+                                    <strong th:text="${analysis.averagePrice30Days != null ? #numbers.formatInteger(analysis.averagePrice30Days,3,'POINT') : 'N/A'}">4,100,000</strong>
+                                    <br><small>30 ngày gần đây</small>
+                                </div>
+                            </div>
+                            <div class="col-6 text-center">
+                                <div class="border rounded p-2">
+                                    <strong th:text="${analysis.averagePrice60Days != null ? #numbers.formatInteger(analysis.averagePrice60Days,3,'POINT') : 'N/A'}">4,000,000</strong>
+                                    <br><small>30-60 ngày trước</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch sử giao dịch gần đây -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">📋 Lịch sử giao dịch gần đây</h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(recentSales)}" class="text-center text-muted py-3">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <p>Chưa có giao dịch nào trong 30 ngày gần đây</p>
+                    </div>
+                    
+                    <div th:unless="${#lists.isEmpty(recentSales)}" class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Ngày bán</th>
+                                    <th>Giá bán</th>
+                                    <th>Người mua</th>
+                                    <th>Người bán</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="sale : ${recentSales}">
+                                    <td th:text="${#temporals.format(sale.soldAt, 'dd/MM/yyyy HH:mm')}">01/10/2024 10:00</td>
+                                    <td>
+                                        <strong th:text="${#numbers.formatInteger(sale.soldPrice,3,'POINT')}">4,100,000</strong> VNĐ
+                                    </td>
+                                    <td th:text="${sale.buyer.username}">buyer1</td>
+                                    <td th:text="${sale.seller.username}">seller1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="mt-4 text-center">
+        <a th:href="@{/pricing/dashboard}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
+        <a th:href="@{/products}" class="btn btn-primary">
+            <i class="fas fa-list"></i> Xem tất cả sản phẩm
+        </a>
+        <button class="btn btn-success" onclick="applySuggestedPrice()" sec:authorize="hasRole('SELLER')">
+            <i class="fas fa-magic"></i> Áp dụng giá gợi ý
+        </button>
+    </div>
+</section>
+
+<script>
+function applySuggestedPrice() {
+    if (confirm('Bạn có chắc muốn áp dụng giá gợi ý của AI?')) {
+        // TODO: Implement apply suggested price functionality
+        alert('Tính năng đang được phát triển!');
+    }
+}
+</script>
+</body>
+</html>

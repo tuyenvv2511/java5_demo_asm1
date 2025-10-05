@@ -1,33 +1,48 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(content=~{::section})}">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout :: layout(content=~{::section})}">
 <section th:fragment="content">
-    <div class="d-flex mb-3">
-        <h3 class="me-auto" th:text="#{nav.products}">Products</h3>
-        <a class="btn btn-success" th:href="@{/products/create}" th:text="#{btn.create}">Create</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1" th:text="#{nav.products}">Products</h2>
+            <p class="text-muted mb-0" th:text="#{product.explore}">Khám phá các sản phẩm sưu tầm độc đáo</p>
+        </div>
+        <!-- Create button only for SELLER -->
+        <a class="btn btn-success" th:href="@{/products/create}" sec:authorize="hasRole('SELLER')">
+            <i class="fas fa-plus me-2"></i><span th:text="#{btn.create}">Create</span>
+        </a>
     </div>
 
-    <form class="row g-2 mb-3">
-        <div class="col-auto">
-            <select name="brand" class="form-select">
-                <option value="">[[#{filter.brand}]]</option>
-                <option th:each="b : ${brands}" th:value="${b.slug}" th:text="${b.name}"
-                        th:selected="${brand == b.slug}"></option>
-            </select>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label"><i class="fas fa-tags me-1"></i>[[#{filter.brand}]]</label>
+                    <select name="brand" class="form-select">
+                        <option value="" th:text="#{filter.all.brands}">Tất cả thương hiệu</option>
+                        <option th:each="b : ${brands}" th:value="${b.slug}" th:text="${b.name}"
+                                th:selected="${brand == b.slug}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label"><i class="fas fa-list me-1"></i>[[#{filter.category}]]</label>
+                    <select name="category" class="form-select">
+                        <option value="" th:text="#{filter.all.categories}">Tất cả danh mục</option>
+                        <option th:each="c : ${categories}" th:value="${c.slug}" th:text="${c.name}"
+                                th:selected="${category == c.slug}"></option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label"><i class="fas fa-search me-1"></i>[[#{search.placeholder}]]</label>
+                    <input class="form-control" name="q" th:value="${q}" th:placeholder="#{search.placeholder}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" th:text="#{filter.button}">
+                        <i class="fas fa-filter me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="col-auto">
-            <select name="category" class="form-select">
-                <option value="">[[#{filter.category}]]</option>
-                <option th:each="c : ${categories}" th:value="${c.slug}" th:text="${c.name}"
-                        th:selected="${category == c.slug}"></option>
-            </select>
-        </div>
-        <div class="col-auto">
-            <input class="form-control" name="q" th:value="${q}" th:placeholder="#{search.placeholder}">
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-primary" th:text="#{filter.button}">Filter</button>
-        </div>
-    </form>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-striped table-hover bg-white shadow-sm">
@@ -50,43 +65,51 @@
                 <td>
                     <div class="d-flex align-items-center">
                         <!-- Hiển thị hình ảnh sản phẩm -->
-                        <div class="me-3" style="width: 60px; height: 60px;">
+                        <div class="me-3">
                             <img th:if="${p.imageUrl != null and p.imageUrl != ''}" 
                                  th:src="${p.imageUrl}" 
                                  alt="Product Image" 
-                                 class="img-thumbnail" 
-                                 style="width: 100%; height: 100%; object-fit: cover;">
+                                 class="product-image">
                             <div th:unless="${p.imageUrl != null and p.imageUrl != ''}" 
-                                 class="bg-light d-flex align-items-center justify-content-center" 
-                                 style="width: 100%; height: 100%; border: 1px solid #dee2e6;">
+                                 class="product-image bg-light d-flex align-items-center justify-content-center">
                                 <i class="fas fa-image text-muted"></i>
                             </div>
                         </div>
-                        <div>
-                            <span th:text="${p.title}">Title</span>
-                            <div class="mt-1">
-                                <a class="btn btn-sm btn-outline-secondary me-1"
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 fw-semibold" th:text="${p.title}">Title</h6>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a class="btn btn-sm btn-outline-primary"
                                    th:attr="data-product-id=${p.id}, data-title=${p.title}"
-                                   onclick="openChat(this)">[[#{chat.join}]]</a>
-                                <a th:if="${p.active}" 
+                                   onclick="openChat(this)">
+                                    <i class="fas fa-comments me-1"></i>[[#{chat.join}]]
+                                </a>
+                                <!-- Buy button only for BUYER role -->
+                                <a th:if="${p.active}" sec:authorize="hasRole('BUYER')"
                                    th:href="@{/orders/buy/{id}(id=${p.id})}" 
-                                   class="btn btn-sm btn-success" th:text="#{product.buyNow}">Buy Now</a>
+                                   class="btn btn-sm btn-success">
+                                    <i class="fas fa-shopping-cart me-1"></i><span th:text="#{product.buyNow}">Buy Now</span>
+                                </a>
                                 <span th:unless="${p.active}" 
                                       class="badge bg-secondary" th:text="#{product.sold}">Sold</span>
+                                <!-- Show login prompt for non-buyers -->
+                                <small th:if="${p.active}" sec:authorize="!hasRole('BUYER')"
+                                       class="text-muted" th:text="#{product.login.buyer.prompt}">Đăng nhập với tài khoản BUYER để mua</small>
                             </div>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <div th:if="${p.hasActivePromotion()}">
-                        <div class="text-decoration-line-through text-muted small" 
-                             th:text="${#numbers.formatInteger(p.price,3,'POINT')}">4,200,000</div>
-                        <div class="text-danger fw-bold" 
-                             th:text="${#numbers.formatInteger(p.discountedPrice,3,'POINT')}">3,500,000</div>
-                        <span class="badge bg-danger" th:text="#{product.sale}">Sale</span>
+                    <div th:if="${p.hasActivePromotion()}" class="text-end">
+                        <div class="text-decoration-line-through text-muted small mb-1" 
+                             th:text="${#numbers.formatInteger(p.price,3,'POINT')} + ' ₫'">4,200,000 ₫</div>
+                        <div class="text-danger fw-bold fs-6" 
+                             th:text="${#numbers.formatInteger(p.discountedPrice,3,'POINT')} + ' ₫'">3,500,000 ₫</div>
+                        <span class="badge bg-danger small">Sale</span>
                     </div>
-                    <div th:unless="${p.hasActivePromotion()}" 
-                         th:text="${#numbers.formatInteger(p.price,3,'POINT')}">4,200,000</div>
+                    <div th:unless="${p.hasActivePromotion()}" class="text-end">
+                        <div class="fw-bold text-dark fs-6" 
+                             th:text="${#numbers.formatInteger(p.price,3,'POINT')} + ' ₫'">4,200,000 ₫</div>
+                    </div>
                 </td>
                 <td th:text="#{'condition.' + ${p.conditionGrade}}">LIKE_NEW</td>
                 <td th:text="${p.brand != null ? p.brand.name : '-'}">Nike</td>
@@ -95,14 +118,22 @@
                 <td>
                     <span class="badge bg-warning" th:text="#{product.pending}">Pending</span>
                 </td>
-                <td class="text-end">
-                    <a th:href="@{|/products/${p.id}/edit|}" class="btn btn-sm btn-primary"
-                       th:text="#{btn.edit}">Edit</a>
-                    <form th:action="@{|/products/${p.id}/delete|}" method="post" class="d-inline">
-                        <button class="btn btn-sm btn-danger" th:text="#{btn.delete}"
-                                th:onclick="'return confirm(\'' + #{product.deleteConfirm} + '\')'">Delete
-                        </button>
-                    </form>
+                <td>
+                    <div class="d-flex gap-1">
+                        <!-- Chỉ hiển thị nút Edit/Delete cho admin hoặc seller sở hữu sản phẩm -->
+                        <a th:href="@{|/products/${p.id}/edit|}" class="btn btn-sm btn-primary"
+                           th:text="#{btn.edit}"
+                           sec:authorize="hasRole('ADMIN') or (hasRole('SELLER') and authentication.name == p.seller.username)">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form th:action="@{|/products/${p.id}/delete|}" method="post" class="d-inline"
+                              sec:authorize="hasRole('ADMIN') or (hasRole('SELLER') and authentication.name == p.seller.username)">
+                            <button class="btn btn-sm btn-danger" 
+                                    th:onclick="'return confirm(\'' + #{product.deleteConfirm} + '\')'">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             </tbody>

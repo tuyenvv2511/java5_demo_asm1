@@ -78,6 +78,9 @@ public class Product {
     @Transient
     private BigDecimal discountedPrice;
     
+    @Transient
+    private org.example.demo_j5_asm1.service.PricingService.PricingAnalysis pricingAnalysis;
+    
     // Check if product has active promotion
     public boolean hasActivePromotion() {
         return discountedPrice != null && discountedPrice.compareTo(price) < 0;

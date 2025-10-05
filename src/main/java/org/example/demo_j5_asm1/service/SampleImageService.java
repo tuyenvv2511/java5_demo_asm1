@@ -83,5 +83,12 @@ public class SampleImageService {
         createSampleImage("Panini Prizm Messi #15", "Panini", 300, 300);
         createSampleImage("Jordan 1 Retro High", "Jordan", 300, 300);
         createSampleImage("Converse Chuck Taylor", "Converse", 300, 300);
+        
+        // Tạo ảnh cho Figures & Toys
+        createSampleImage("Funko Pop Batman #01", "Funko", 300, 300);
+        createSampleImage("Bandai Gundam RX-78-2", "Bandai", 300, 300);
+        createSampleImage("Hasbro Transformers Optimus Prime", "Hasbro", 300, 300);
+        createSampleImage("Lego Star Wars AT-AT", "Lego", 300, 300);
+        createSampleImage("Lego Star Wars Death Star", "Lego", 300, 300);
     }
 }

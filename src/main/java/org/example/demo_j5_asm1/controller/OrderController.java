@@ -10,6 +10,8 @@ import org.example.demo_j5_asm1.repository.OrderRepository;
 import org.example.demo_j5_asm1.repository.ProductRepository;
 import org.example.demo_j5_asm1.service.OrderService;
 import org.example.demo_j5_asm1.service.PromotionService;
+import org.example.demo_j5_asm1.service.UserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,20 +32,27 @@ public class OrderController {
     private final ProductRepository productRepo;
     private final OrderService orderService;
     private final PromotionService promotionService;
+    private final UserService userService;
     
     @GetMapping
-    public String list(Model model) {
-        // TODO: Lấy user hiện tại từ session/security
-        // Tạm thời dùng user mặc định - buyer1
-        User currentUser = createUser(1L, User.Role.BUYER);
+    public String list(Authentication authentication, Model model) {
+        User currentUser = getCurrentUser(authentication);
         
-        // Lấy đơn hàng của người mua (buyer1)
-        List<Order> myOrders = orderRepo.findByBuyerOrderByCreatedAtDesc(currentUser);
+        List<Order> myOrders = List.of();
+        List<Order> mySales = List.of();
         
-        // Lấy đơn hàng của người bán (seller1) - cần tạo user seller
-        User sellerUser = createUser(2L, User.Role.SELLER);
-        List<Order> mySales = orderRepo.findBySellerOrderByCreatedAtDesc(sellerUser);
+        // Hiển thị đơn hàng theo vai trò
+        if (currentUser.getRole() == User.Role.BUYER) {
+            myOrders = orderRepo.findByBuyerOrderByCreatedAtDesc(currentUser);
+        } else if (currentUser.getRole() == User.Role.SELLER) {
+            mySales = orderRepo.findBySellerOrderByCreatedAtDesc(currentUser);
+        } else if (currentUser.getRole() == User.Role.ADMIN) {
+            // Admin có thể xem tất cả
+            myOrders = orderRepo.findByBuyerOrderByCreatedAtDesc(currentUser);
+            mySales = orderRepo.findBySellerOrderByCreatedAtDesc(currentUser);
+        }
         
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("myOrders", myOrders);
         model.addAttribute("mySales", mySales);
         return "orders/list";
@@ -71,10 +80,10 @@ public class OrderController {
     public String processBuy(@PathVariable Long productId,
                            @RequestParam BigDecimal orderPrice,
                            @RequestParam(required = false) String notes,
+                           Authentication authentication,
                            RedirectAttributes redirectAttributes) {
         try {
-            // TODO: Lấy user hiện tại từ session/security
-            User buyer = createUser(1L, User.Role.BUYER);
+            User buyer = getCurrentUser(authentication);
             
             Order order = orderService.createOrder(productId, buyer, orderPrice, notes);
             
@@ -84,18 +93,17 @@ public class OrderController {
             
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/products/" + productId + "/buy";
+            return "redirect:/orders/buy/" + productId;
         }
     }
     
     @PostMapping("/{orderId}/status")
     public String updateStatus(@PathVariable Long orderId,
                              @RequestParam Order.OrderStatus status,
+                             Authentication authentication,
                              RedirectAttributes redirectAttributes) {
         try {
-            // TODO: Lấy user hiện tại từ session/security
-            // Tạm thời tạo user seller với role SELLER
-            User currentUser = createUser(2L, User.Role.SELLER);
+            User currentUser = getCurrentUser(authentication);
             
             orderService.updateOrderStatus(orderId, status, currentUser);
             
@@ -111,11 +119,10 @@ public class OrderController {
     
     @PostMapping("/{orderId}/cancel")
     public String cancelOrder(@PathVariable Long orderId,
+                            Authentication authentication,
                             RedirectAttributes redirectAttributes) {
         try {
-            // TODO: Lấy user hiện tại từ session/security
-            // Tạm thời tạo user buyer với role BUYER
-            User currentUser = createUser(1L, User.Role.BUYER);
+            User currentUser = getCurrentUser(authentication);
             
             orderService.cancelOrder(orderId, currentUser);
             
@@ -131,11 +138,10 @@ public class OrderController {
     
     @PostMapping("/{orderId}/complete")
     public String completeOrder(@PathVariable Long orderId,
+                              Authentication authentication,
                               RedirectAttributes redirectAttributes) {
         try {
-            // TODO: Lấy user hiện tại từ session/security
-            // Tạm thời tạo user buyer với role BUYER
-            User currentUser = createUser(1L, User.Role.BUYER);
+            User currentUser = getCurrentUser(authentication);
             
             orderService.completeOrder(orderId, currentUser);
             
@@ -150,13 +156,11 @@ public class OrderController {
     }
     
     /**
-     * Helper method để tạo user với role phù hợp
-     * TODO: Thay thế bằng việc lấy user từ session/security
+     * Helper method để lấy user hiện tại từ authentication
      */
-    private User createUser(Long id, User.Role role) {
-        User user = new User();
-        user.setId(id);
-        user.setRole(role);
-        return user;
+    private User getCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        return userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
 }

@@ -11,7 +11,41 @@
             </div>
             <div class="col-md-6">
                 <label class="form-label" th:text="#{product.price}">Price</label>
-                <input type="number" min="0" step="1000" class="form-control" th:field="*{price}" required>
+                <div class="input-group">
+                    <input type="number" min="0" step="1000" class="form-control" th:field="*{price}" required id="priceInput">
+                    <button type="button" class="btn btn-outline-primary" onclick="getAISuggestion()" id="aiSuggestBtn">
+                        <i class="fas fa-brain"></i> AI Gợi ý
+                    </button>
+                </div>
+                
+                <!-- Test button for debugging -->
+                <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-warning" onclick="testFunction()">
+                        <i class="fas fa-bug"></i> Test
+                    </button>
+                </div>
+                
+                <!-- AI Pricing Suggestion -->
+                <div id="aiSuggestion" class="mt-2" style="display: none;">
+                    <div class="alert alert-info">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>🤖 Gợi ý AI:</strong>
+                                <span id="suggestedPrice" class="ms-2"></span>
+                                <br>
+                                <small id="suggestionDetails" class="text-muted"></small>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-success" onclick="applySuggestion()">
+                                    <i class="fas fa-magic"></i> Áp dụng
+                                </button>
+                                <button type="button" class="btn btn-sm btn-secondary" onclick="hideSuggestion()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-12">
                 <label class="form-label" th:text="#{product.description}">Description</label>
@@ -58,9 +92,15 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label" th:text="#{product.seller}">Seller</label>
-                <select class="form-select" th:field="*{seller}" required>
-                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}"></option>
+                <select class="form-select" th:field="*{seller}" required id="sellerSelect">
+                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username}" 
+                            th:selected="${currentUser != null and currentUser.id == u.id}"></option>
                 </select>
+                <!-- Auto-select current user as seller if they have SELLER role -->
+                <div th:if="${currentUser != null}" class="form-text">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    <span th:text="'Tự động chọn: ' + ${currentUser.username}">Tự động chọn: seller1</span>
+                </div>
             </div>
             <div class="col-12 form-check">
                 <input class="form-check-input" type="checkbox" th:field="*{active}">
@@ -78,6 +118,170 @@
 </section>
 
 <script>
+    // AI Pricing Suggestion - Real API version
+    function getAISuggestion() {
+        console.log('AI Suggestion button clicked!');
+        
+        const btn = document.getElementById('aiSuggestBtn');
+        const suggestion = document.getElementById('aiSuggestion');
+        
+        if (!btn || !suggestion) {
+            console.error('Required elements not found!');
+            alert('Lỗi: Không tìm thấy các phần tử cần thiết!');
+            return;
+        }
+        
+        // Show loading state
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang phân tích...';
+        btn.disabled = true;
+        
+        // Get form data
+        const title = document.querySelector('input[name="title"]')?.value || '';
+        const brandId = document.querySelector('select[name="brand"]')?.value || '';
+        const categoryId = document.querySelector('select[name="category"]')?.value || '';
+        const condition = document.querySelector('select[name="conditionGrade"]')?.value || '';
+        const currentPrice = document.getElementById('priceInput')?.value || '0';
+        
+        console.log('Form data:', { title, brandId, categoryId, condition, currentPrice });
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('brandId', brandId);
+        formData.append('categoryId', categoryId);
+        formData.append('condition', condition);
+        formData.append('currentPrice', currentPrice);
+        
+        // Call real API
+        console.log('Calling API...');
+        fetch('/products/ai-suggestion', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('API response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('API response data:', data);
+            if (data.success) {
+                const suggestedPrice = new Intl.NumberFormat('vi-VN').format(data.suggestedPrice) + ' VNĐ';
+                document.getElementById('suggestedPrice').textContent = suggestedPrice;
+                
+                // Show detailed suggestion
+                let details = data.reasoning;
+                if (data.confidence) {
+                    details += ` (Độ tin cậy: ${data.confidence}%)`;
+                }
+                if (data.trend && data.percentage) {
+                    const trendIcon = data.trend === 'increasing' ? '📈' : data.trend === 'decreasing' ? '📉' : '➡️';
+                    const percentage = Math.abs(data.percentage);
+                    details += ` ${trendIcon} ${percentage.toFixed(1)}%`;
+                }
+                
+                document.getElementById('suggestionDetails').textContent = details;
+                suggestion.style.display = 'block';
+                suggestion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                console.log('Real AI suggestion shown:', data.suggestedPrice);
+            } else {
+                console.log('API returned success: false, using fallback');
+                showFallbackSuggestion();
+            }
+        })
+        .catch(error => {
+            console.error('Error getting AI suggestion:', error);
+            showFallbackSuggestion();
+        })
+        .finally(() => {
+            btn.innerHTML = '<i class="fas fa-brain"></i> AI Gợi ý';
+            btn.disabled = false;
+        });
+        
+        function showFallbackSuggestion() {
+            const currentPrice = document.getElementById('priceInput')?.value || 0;
+            const suggestedPrice = Math.round(currentPrice * 0.95);
+            
+            document.getElementById('suggestedPrice').textContent = 
+                new Intl.NumberFormat('vi-VN').format(suggestedPrice) + ' VNĐ';
+            document.getElementById('suggestionDetails').textContent = 
+                'Dựa trên xu hướng thị trường và tình trạng sản phẩm (chế độ demo)';
+            suggestion.style.display = 'block';
+            suggestion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    function applySuggestion() {
+        const suggestedPrice = document.getElementById('suggestedPrice').textContent;
+        const priceValue = suggestedPrice.replace(/[^\d]/g, ''); // Extract number only
+        document.getElementById('priceInput').value = priceValue;
+        hideSuggestion();
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show mt-2';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle"></i> Đã áp dụng giá gợi ý của AI!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.getElementById('aiSuggestion').parentNode.insertBefore(alert, document.getElementById('aiSuggestion').nextSibling);
+        
+        setTimeout(() => alert.remove(), 3000);
+    }
+    
+    function hideSuggestion() {
+        document.getElementById('aiSuggestion').style.display = 'none';
+    }
+
+    // Test function for debugging
+    function testFunction() {
+        console.log('Test button clicked!');
+        alert('JavaScript đang hoạt động!');
+        
+        // Test if elements exist
+        const btn = document.getElementById('aiSuggestBtn');
+        const suggestion = document.getElementById('aiSuggestion');
+        const priceInput = document.getElementById('priceInput');
+        
+        console.log('AI Button:', btn);
+        console.log('Suggestion box:', suggestion);
+        console.log('Price input:', priceInput);
+        
+        if (btn && suggestion && priceInput) {
+            alert('Tất cả các phần tử đều tồn tại!');
+        } else {
+            alert('Thiếu một số phần tử!');
+        }
+    }
+
+    // Auto-select current user as seller when form loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing...');
+        
+        const currentUserInfo = document.querySelector('[th\\:if="${currentUser != null}"]');
+        if (currentUserInfo) {
+            // Extract current user ID from the form data (if available)
+            const currentUserId = /*[[${currentUser.id}]]*/ null;
+            if (currentUserId) {
+                const sellerSelect = document.getElementById('sellerSelect');
+                sellerSelect.value = currentUserId;
+            }
+        }
+        
+        // Test if AI suggestion elements exist
+        const aiBtn = document.getElementById('aiSuggestBtn');
+        const aiSuggestion = document.getElementById('aiSuggestion');
+        
+        if (aiBtn && aiSuggestion) {
+            console.log('AI suggestion elements found and ready!');
+        } else {
+            console.error('AI suggestion elements not found!');
+        }
+    });
+
     // Preview hình ảnh khi chọn file
     document.getElementById('imageFile').addEventListener('change', function(e) {
         const file = e.target.files[0];

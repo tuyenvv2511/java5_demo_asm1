@@ -1,0 +1,239 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body th:replace="~{layout :: layout(content=~{::section})}">
+<section th:fragment="content">
+    <!-- Hero Section - Điểm nổi bật của ứng dụng -->
+    <div class="jumbotron bg-gradient-primary text-white rounded-3 p-5 mb-5">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">
+                        🤖 <span th:text="#{pricing.ai.title}">AI Pricing Intelligence</span>
+                    </h1>
+                    <p class="lead mb-4" th:text="#{app.ai.description}">
+                        Thuật toán AI thông minh phân tích xu hướng thị trường và gợi ý giá tối ưu dựa trên dữ liệu bán hàng thực tế trong 30 ngày gần đây
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <span class="badge bg-light text-dark px-3 py-2">
+                            <i class="fas fa-chart-line me-2"></i>
+                            <span th:text="#{pricing.feature.analysis}">Phân tích xu hướng</span>
+                        </span>
+                        <span class="badge bg-light text-dark px-3 py-2">
+                            <i class="fas fa-brain me-2"></i>
+                            <span th:text="#{pricing.feature.smart}">Gợi ý thông minh</span>
+                        </span>
+                        <span class="badge bg-light text-dark px-3 py-2">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <span th:text="#{pricing.feature.reliability}">Độ tin cậy cao</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <i class="fas fa-robot fa-5x text-white opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-5 g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-2" th:text="${totalSales}">0</h2>
+                    <p class="mb-0 fs-5 fw-medium" th:text="#{dashboard.transactions.30days}">Giao dịch 30 ngày</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <i class="fas fa-money-bill-wave fa-3x mb-3"></i>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-2" th:text="${#numbers.formatInteger(totalValue,3,'POINT')}">0</h2>
+                    <p class="mb-0 fs-5 fw-medium" th:text="#{dashboard.total.value}">Tổng giá trị (VNĐ)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-2" th:text="${#numbers.formatInteger(averagePrice,3,'POINT')}">0</h2>
+                    <p class="mb-0 fs-5 fw-medium" th:text="#{dashboard.average.price}">Giá trung bình</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-warning text-white h-100">
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div class="mb-3">
+                        <i class="fas fa-star fa-3x mb-3"></i>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-2" th:text="${#lists.size(trendingProducts)}">0</h2>
+                    <p class="mb-0 fs-5 fw-medium" th:text="#{dashboard.trending.products}">Sản phẩm có xu hướng</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Sản phẩm có xu hướng thú vị -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-chart-line fa-2x text-primary me-3"></i>
+                        <div>
+                            <h5 class="mb-1 fw-bold">
+                                <span th:text="#{pricing.trending.title}">Sản phẩm có xu hướng giá thú vị</span>
+                            </h5>
+                            <small class="text-muted" th:text="#{dashboard.analysis.description}">Phân tích dựa trên dữ liệu thực tế và thuật toán AI</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(trendingProducts)}" class="text-center text-muted py-4">
+                        <i class="fas fa-chart-line fa-3x mb-3"></i>
+                        <p>Chưa có đủ dữ liệu để phân tích xu hướng</p>
+                    </div>
+                    
+                    <div th:unless="${#lists.isEmpty(trendingProducts)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{product.title}">Sản phẩm</th>
+                                    <th th:text="#{pricing.current.price}">Giá hiện tại</th>
+                                    <th th:text="#{pricing.ai.suggested}">Giá gợi ý AI</th>
+                                    <th th:text="#{pricing.trend}">Xu hướng</th>
+                                    <th th:text="#{pricing.confidence}">Độ tin cậy</th>
+                                    <th th:text="#{pricing.transactions}">Giao dịch</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="product : ${trendingProducts}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img th:if="${product.imageUrl != null}" 
+                                                 th:src="${product.imageUrl}" 
+                                                 class="me-2" 
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                            <div>
+                                                <strong th:text="${product.title}">Product Title</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${product.brand.name}">Brand</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td th:text="${#numbers.formatInteger(product.price,3,'POINT')}">4,200,000</td>
+                                    <td>
+                                        <strong th:text="${#numbers.formatInteger(product.pricingAnalysis.suggestedPrice,3,'POINT')}">4,100,000</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${product.pricingAnalysis.trend == 'RISING'} ? 'bg-success' : 
+                                                             (${product.pricingAnalysis.trend == 'FALLING'} ? 'bg-danger' : 'bg-secondary')"
+                                              th:text="${product.pricingAnalysis.trendIcon + ' ' + product.pricingAnalysis.trendText}">
+                                            ➡️ Ổn định
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" 
+                                                 th:classappend="${product.pricingAnalysis.confidence >= 80} ? 'bg-success' : 
+                                                                 (${product.pricingAnalysis.confidence >= 60} ? 'bg-warning' : 'bg-danger')"
+                                                 th:style="'width: ' + ${product.pricingAnalysis.confidence} + '%'"
+                                                 th:text="${product.pricingAnalysis.confidence} + '%'">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info" th:text="${product.pricingAnalysis.salesCount}">5</span>
+                                        <a th:href="@{/pricing/analyze/{id}(id=${product.id})}" 
+                                           class="btn btn-sm btn-outline-primary ms-2" th:text="#{pricing.details}">Chi tiết</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top sản phẩm bán chạy -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-trophy fa-2x text-warning me-3"></i>
+                        <h6 class="mb-0 fw-bold">
+                            <span th:text="#{pricing.top.title}">Sản phẩm bán chạy nhất</span>
+                        </h6>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(topSellingProducts)}" class="text-center text-muted py-3">
+                        <p th:text="#{pricing.no.data}">Chưa có dữ liệu</p>
+                    </div>
+                    
+                    <div th:unless="${#lists.isEmpty(topSellingProducts)}" class="list-group list-group-flush">
+                        <div th:each="item, iterStat : ${topSellingProducts}" 
+                             class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong th:text="${item[1]}">Product Name</strong>
+                                <br>
+                                <small class="text-muted" th:text="${item[0]}">Brand</small>
+                            </div>
+                            <div class="text-end">
+                                <div th:text="${#numbers.formatInteger(item[2],3,'POINT')}">4,200,000</div>
+                                <small class="text-muted" th:text="${item[3]} + ' ' + #{common.transactions}">5 giao dịch</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cách hoạt động của AI -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-cogs fa-2x text-info me-3"></i>
+                        <h6 class="mb-0 fw-bold">
+                            <span th:text="#{pricing.how.title}">Cách hoạt động</span>
+                        </h6>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li class="mb-2">
+                            <strong th:text="#{pricing.how.step1}">Thu thập dữ liệu:</strong><br>
+                            <small th:text="#{pricing.how.step1.desc}">Phân tích tất cả giao dịch 30-60 ngày gần đây</small>
+                        </li>
+                        <li class="mb-2">
+                            <strong th:text="#{pricing.how.step2}">Phân tích xu hướng:</strong><br>
+                            <small th:text="#{pricing.how.step2.desc}">So sánh giá trung bình theo từng giai đoạn</small>
+                        </li>
+                        <li class="mb-2">
+                            <strong th:text="#{pricing.how.step3}">Điều chỉnh theo tình trạng:</strong><br>
+                            <small th:text="#{pricing.how.step3.desc}">Áp dụng hệ số dựa trên condition (NEW, USED, etc.)</small>
+                        </li>
+                        <li>
+                            <strong th:text="#{pricing.how.step4}">Gợi ý tối ưu:</strong><br>
+                            <small th:text="#{pricing.how.step4.desc}">Đưa ra giá đề xuất với độ tin cậy cao</small>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
+
+</html>

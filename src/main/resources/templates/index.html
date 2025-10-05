@@ -1,36 +1,87 @@
 <!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
 <head>
     <meta charset="utf-8">
     <title th:text="#{app.title}">CollectX</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
-    <link th:href="@{/css/style.css}" rel="stylesheet">
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" th:href="@{/}" th:text="#{app.title}">CollectX</a>
-        <ul class="navbar-nav me-auto">
-            <li class="nav-item"><a class="nav-link" th:href="@{/products}" th:text="#{nav.products}">Products</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/brands}" th:text="#{nav.brands}">Brands</a></li>
-            <li class="nav-item"><a class="nav-link" th:href="@{/categories}" th:text="#{nav.categories}">Categories</a></li>
-        </ul>
-        <div class="d-flex gap-2">
-            <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=vi)}">VI</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=en)}">EN</a>
-            <a class="btn btn-outline-light btn-sm" th:href="@{/(lang=ja)}">JA</a>
+<body>
+<div th:fragment="content">
+    <!-- Hero Section với AI Pricing -->
+    <div class="hero-section">
+        <div class="container hero-content">
+            <h1 class="hero-title" th:text="#{app.title}">CollectX</h1>
+            <p class="hero-subtitle" th:text="#{app.subtitle}">Nền tảng giao dịch thông minh với AI Pricing Intelligence</p>
+            <div class="mb-4">
+                <i class="fas fa-robot text-warning me-2"></i>
+                <span th:text="#{app.ai.description}">Thuật toán AI phân tích xu hướng thị trường và gợi ý giá tối ưu</span>
+            </div>
+            <div class="hero-buttons">
+                <a href="/products" class="hero-cta me-3" th:text="#{nav.products}">Xem sản phẩm</a>
+                <a href="/pricing/features" class="hero-cta" style="background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.8);">
+                    <i class="fas fa-brain me-2"></i><span th:text="#{home.ai.features}">Tính năng AI</span>
+                </a>
+            </div>
         </div>
     </div>
-</nav>
-<main class="container my-4">
-    <div class="p-5 bg-white rounded-3 shadow-sm">
-        <h1 class="mb-3" th:text="#{app.title}">CollectX</h1>
-        <p class="lead">Welcome to The Collect X <a th:href="@{/products}">Products</a>.</p>
+
+    <!-- Features Grid -->
+    <div class="container">
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon blue">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="feature-title" th:text="#{pricing.ai.title}">AI Pricing Intelligence</h3>
+                <p class="feature-description" th:text="#{home.ai.description}">
+                    Thuật toán AI thông minh phân tích dữ liệu thực tế để gợi ý giá tối ưu dựa trên xu hướng thị trường.
+                </p>
+                <a th:href="@{/pricing/features}" class="btn btn-primary" th:text="#{home.learn.more}">Tìm hiểu thêm</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon green">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="feature-title" th:text="#{home.clear.auth}">Phân quyền rõ ràng</h3>
+                <p class="feature-description" th:text="#{home.auth.description}">
+                    Hệ thống phân quyền BUYER/SELLER giúp quản lý giao dịch hiệu quả và bảo mật.
+                </p>
+                <a th:href="@{/login}" class="btn btn-success" th:text="#{auth.login}">Đăng nhập</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon orange">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="feature-title" th:text="#{home.track.trends}">Theo dõi xu hướng</h3>
+                <p class="feature-description" th:text="#{home.trend.description}">
+                    Dashboard phân tích xu hướng giá cả và thống kê giao dịch chi tiết.
+                </p>
+                <a th:href="@{/pricing/dashboard}" class="btn btn-info" th:if="${#authentication.authenticated}" th:text="#{home.view.dashboard}">Xem Dashboard</a>
+                <a th:href="@{/register}" class="btn btn-info" th:unless="${#authentication.authenticated}" th:text="#{auth.register}">Đăng ký</a>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="ai-highlight">
+            <h3>🚀 <span th:text="#{home.start.today}">Bắt đầu ngay hôm nay!</span></h3>
+            <p th:text="#{home.join.platform}">
+                Tham gia nền tảng giao dịch thông minh với AI Pricing Intelligence
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a th:href="@{/register}" class="ai-cta" th:unless="${#authentication.authenticated}">
+                    <i class="fas fa-user-plus me-2"></i><span th:text="#{home.register.free}">Đăng ký miễn phí</span>
+                </a>
+                <a th:href="@{/products}" class="ai-cta" th:if="${#authentication.authenticated}">
+                    <i class="fas fa-shopping-cart me-2"></i><span th:text="#{home.view.products}">Xem sản phẩm</span>
+                </a>
+                <a th:href="@{/login}" class="ai-cta" style="background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.8);" th:unless="${#authentication.authenticated}">
+                    <i class="fas fa-sign-in-alt me-2"></i><span th:text="#{auth.login}">Đăng nhập</span>
+                </a>
+            </div>
+        </div>
     </div>
-</main>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</div>
 </body>
 </html>
