@@ -49,9 +49,24 @@ public class ProductController {
     public String list(@RequestParam(required = false) String brand,
                        @RequestParam(required = false) String category,
                        @RequestParam(required = false, name = "q") String keyword,
+                       @RequestParam(required = false) BigDecimal minPrice,
+                       @RequestParam(required = false) BigDecimal maxPrice,
+                       @RequestParam(required = false, defaultValue = "id") String sortBy,
+                       @RequestParam(required = false, defaultValue = "asc") String sortDir,
+                       @RequestParam(required = false, defaultValue = "0") int page,
+                       @RequestParam(required = false, defaultValue = "10") int size,
                        Model model) {
-        var spec = ProductSpecs.byFilters(brand, category, keyword);
-        var products = productRepo.findAll(spec);
+        var spec = ProductSpecs.byFilters(brand, category, keyword, minPrice, maxPrice);
+        
+        // Tạo Sort object
+        var sort = sortDir.equals("desc") ? 
+            org.springframework.data.domain.Sort.by(sortBy).descending() : 
+            org.springframework.data.domain.Sort.by(sortBy).ascending();
+            
+        // Tạo Pageable object
+        var pageable = org.springframework.data.domain.PageRequest.of(page, size, sort);
+        var productsPage = productRepo.findAll(spec, pageable);
+        var products = productsPage.getContent();
         
         // Tính giá khuyến mãi cho từng sản phẩm
         for (var product : products) {
@@ -65,6 +80,16 @@ public class ProductController {
         model.addAttribute("brand", brand);
         model.addAttribute("category", category);
         model.addAttribute("q", keyword);
+        model.addAttribute("minPrice", minPrice);
+        model.addAttribute("maxPrice", maxPrice);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("pageSize", size);
+        model.addAttribute("totalPages", productsPage.getTotalPages());
+        model.addAttribute("totalElements", productsPage.getTotalElements());
+        model.addAttribute("hasNext", productsPage.hasNext());
+        model.addAttribute("hasPrevious", productsPage.hasPrevious());
         return "products/list";
     }
 

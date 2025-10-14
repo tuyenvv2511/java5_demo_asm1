@@ -1,5 +1,6 @@
 package org.example.demo_j5_asm1.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,8 @@ import org.springframework.data.jpa.domain.Specification;
 import jakarta.persistence.criteria.Predicate;
 
 public class ProductSpecs {
-    public static Specification<Product> byFilters(String brandSlug, String catSlug, String q) {
+    public static Specification<Product> byFilters(String brandSlug, String catSlug, String q, 
+                                                   BigDecimal minPrice, BigDecimal maxPrice) {
         return (root, cq, cb) -> {
             List<Predicate> ps = new ArrayList<>();
             
@@ -27,6 +29,13 @@ public class ProductSpecs {
                         cb.like(cb.lower(root.get("description")), like)
                 ));
             }
+            
+            // Lọc theo khoảng giá
+            if (minPrice != null)
+                ps.add(cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+            if (maxPrice != null)
+                ps.add(cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+                
             return cb.and(ps.toArray(Predicate[]::new));
         };
     }

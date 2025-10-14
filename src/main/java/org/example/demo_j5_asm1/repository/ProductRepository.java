@@ -10,4 +10,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     Optional<Product> findByTitle(String title);
     List<Product> findByActiveTrue(); // Chỉ lấy sản phẩm active
+    long countByActiveTrue(); // Đếm sản phẩm active
 }

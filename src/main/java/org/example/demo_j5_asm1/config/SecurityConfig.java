@@ -41,7 +41,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/h2-console/**").permitAll()
                 // Chỉ cho phép xem danh sách sản phẩm và chi tiết sản phẩm mà không cần đăng nhập
                 .requestMatchers("/products", "/products/").permitAll()
                 .requestMatchers("/products/ai-suggestion").permitAll()
@@ -57,6 +57,7 @@ public class SecurityConfig {
                 .requestMatchers("/users/**").hasRole("ADMIN")
                 .requestMatchers("/categories/**").hasRole("ADMIN")
                 .requestMatchers("/brands/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -69,6 +70,8 @@ public class SecurityConfig {
                 .logoutSuccessUrl("/")
                 .permitAll()
             )
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
+            .headers(headers -> headers.frameOptions().disable())
             .authenticationProvider(authenticationProvider());
 
         return http.build();

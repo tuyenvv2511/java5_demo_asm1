@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Dữ liệu - CollectX Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{layout :: layout(content=~{::content})}">
+        <!-- Content will be replaced here -->
+    </div>
+
+    <section th:fragment="content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="page-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">🗄️ <span>Quản lý Dữ liệu Database</span></h2>
+                        <p class="text-muted mb-0">Quản lý và điều khiển dữ liệu mẫu trong hệ thống</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-info" onclick="testPromotionUpdate()">
+                            <i class="fas fa-clock me-2"></i>Test Promotion Update
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="testDailyMaintenance()">
+                            <i class="fas fa-tools me-2"></i>Test Daily Maintenance
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="refreshStats()">
+                            <i class="fas fa-sync-alt me-2"></i>Làm mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${warningMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-times-circle me-2"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Current Data Statistics -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Thống kê Dữ liệu Hiện tại</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="dataStats">
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-primary" th:text="${currentCount.brands}">0</div>
+                                        <div class="text-muted">Thương hiệu</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-success" th:text="${currentCount.categories}">0</div>
+                                        <div class="text-muted">Danh mục</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-info" th:text="${currentCount.users}">0</div>
+                                        <div class="text-muted">Người dùng</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-warning" th:text="${currentCount.products}">0</div>
+                                        <div class="text-muted">Sản phẩm</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-secondary" th:text="${currentCount.promotions}">0</div>
+                                        <div class="text-muted">Khuyến mãi</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center">
+                                        <div class="h3 text-dark" th:text="${currentCount.sales}">0</div>
+                                        <div class="text-muted">Giao dịch</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Management Actions -->
+            <div class="row">
+                <!-- Load All Data -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-download me-2"></i>Load Tất cả Dữ liệu</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Load toàn bộ dữ liệu mẫu bao gồm brands, categories, users, products, promotions và sales.</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-lg" onclick="loadAllData()">
+                                    <i class="fas fa-download me-2"></i>Load Tất cả Dữ liệu
+                                </button>
+                                <small class="text-muted">⚠️ Sẽ ghi đè dữ liệu hiện tại</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clear All Data -->
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-trash-alt me-2"></i>Xóa Tất cả Dữ liệu</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Xóa hoàn toàn tất cả dữ liệu trong database. Thao tác này không thể hoàn tác!</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-danger btn-lg" onclick="clearAllData()">
+                                    <i class="fas fa-trash-alt me-2"></i>Xóa Tất cả Dữ liệu
+                                </button>
+                                <small class="text-danger">🚨 CẢNH BÁO: Thao tác nguy hiểm!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Load Specific Data -->
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Load Dữ liệu Cụ thể</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Load từng loại dữ liệu riêng biệt:</p>
+                            <div class="row">
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-primary w-100" onclick="loadSpecificData('brands')">
+                                        <i class="fas fa-tags me-1"></i>Brands
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-success w-100" onclick="loadSpecificData('categories')">
+                                        <i class="fas fa-list me-1"></i>Categories
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-info w-100" onclick="loadSpecificData('users')">
+                                        <i class="fas fa-users me-1"></i>Users
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-warning w-100" onclick="loadSpecificData('products')">
+                                        <i class="fas fa-box me-1"></i>Products
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-secondary w-100" onclick="loadSpecificData('promotions')">
+                                        <i class="fas fa-percentage me-1"></i>Promotions
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <button class="btn btn-outline-dark w-100" onclick="loadSpecificData('sales')">
+                                        <i class="fas fa-chart-line me-1"></i>Sales
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Load Result (if available) -->
+            <div th:if="${result}" class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header" th:classappend="${result.success} ? 'bg-success text-white' : 'bg-danger text-white'">
+                            <h5 class="mb-0">
+                                <i th:class="${result.success} ? 'fas fa-check-circle' : 'fas fa-times-circle'" class="me-2"></i>
+                                Kết quả Thao tác
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Trước khi thực hiện:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Brands: <span th:text="${result.beforeCount.brands}">0</span></li>
+                                        <li>Categories: <span th:text="${result.beforeCount.categories}">0</span></li>
+                                        <li>Users: <span th:text="${result.beforeCount.users}">0</span></li>
+                                        <li>Products: <span th:text="${result.beforeCount.products}">0</span></li>
+                                        <li>Promotions: <span th:text="${result.beforeCount.promotions}">0</span></li>
+                                        <li>Sales: <span th:text="${result.beforeCount.sales}">0</span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Sau khi thực hiện:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Brands: <span th:text="${result.afterCount.brands}">0</span></li>
+                                        <li>Categories: <span th:text="${result.afterCount.categories}">0</span></li>
+                                        <li>Users: <span th:text="${result.afterCount.users}">0</span></li>
+                                        <li>Products: <span th:text="${result.afterCount.products}">0</span></li>
+                                        <li>Promotions: <span th:text="${result.afterCount.promotions}">0</span></li>
+                                        <li>Sales: <span th:text="${result.afterCount.sales}">0</span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Statements executed:</strong> <span th:text="${result.statementsExecuted}">0</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Message:</strong> <span th:text="${result.message}">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SQL Files Info -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Thông tin SQL Files</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Dữ liệu được lưu trữ trong các file SQL tại <code>src/main/resources/db/init-data/</code>:</p>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-file-code text-primary me-2"></i><code>init-all-data.sql</code> - Tất cả dữ liệu</li>
+                                <li><i class="fas fa-file-code text-success me-2"></i><code>brands.sql</code> - Thương hiệu</li>
+                                <li><i class="fas fa-file-code text-info me-2"></i><code>categories.sql</code> - Danh mục</li>
+                                <li><i class="fas fa-file-code text-warning me-2"></i><code>users.sql</code> - Người dùng</li>
+                                <li><i class="fas fa-file-code text-secondary me-2"></i><code>products.sql</code> - Sản phẩm</li>
+                                <li><i class="fas fa-file-code text-danger me-2"></i><code>promotions.sql</code> - Khuyến mãi</li>
+                                <li><i class="fas fa-file-code text-dark me-2"></i><code>sales.sql</code> - Giao dịch</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5>Đang xử lý...</h5>
+                    <p class="text-muted">Vui lòng chờ trong giây lát</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Loading modal
+        function showLoading() {
+            const modal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            modal.show();
+        }
+
+        function hideLoading() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+
+        // Load all data
+        function loadAllData() {
+            if (confirm('Bạn có chắc chắn muốn load tất cả dữ liệu? Thao tác này sẽ ghi đè dữ liệu hiện tại.')) {
+                showLoading();
+                fetch('/admin/data/api/load-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showAlert('success', `✅ Load thành công ${data.statementsExecuted} statements!`);
+                        refreshStats();
+                    } else {
+                        showAlert('error', `❌ Lỗi: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showAlert('error', '❌ Lỗi hệ thống: ' + error.message);
+                });
+            }
+        }
+
+        // Load specific data
+        function loadSpecificData(dataType) {
+            if (confirm(`Bạn có chắc chắn muốn load dữ liệu ${dataType}?`)) {
+                showLoading();
+                fetch(`/admin/data/api/load/${dataType}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        showAlert('success', `✅ Load thành công dữ liệu ${dataType}: ${data.statementsExecuted} statements`);
+                        refreshStats();
+                    } else {
+                        showAlert('error', `❌ Lỗi: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    showAlert('error', '❌ Lỗi hệ thống: ' + error.message);
+                });
+            }
+        }
+
+        // Clear all data
+        function clearAllData() {
+            if (confirm('⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XÓA TẤT CẢ dữ liệu? Thao tác này không thể hoàn tác!')) {
+                if (confirm('🚨 LẦN CUỐI: Bạn thực sự muốn xóa tất cả dữ liệu?')) {
+                    showLoading();
+                    fetch('/admin/data/api/clear-all', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoading();
+                        if (data.success) {
+                            showAlert('warning', '⚠️ Đã xóa tất cả dữ liệu!');
+                            refreshStats();
+                        } else {
+                            showAlert('error', `❌ Lỗi: ${data.message}`);
+                        }
+                    })
+                    .catch(error => {
+                        hideLoading();
+                        showAlert('error', '❌ Lỗi hệ thống: ' + error.message);
+                    });
+                }
+            }
+        }
+
+        // Refresh statistics
+        function refreshStats() {
+            fetch('/admin/data/stats')
+                .then(response => response.json())
+                .then(data => {
+                    updateStatsDisplay(data);
+                })
+                .catch(error => {
+                    console.error('Error refreshing stats:', error);
+                });
+        }
+
+        // Update stats display
+        function updateStatsDisplay(data) {
+            const statsContainer = document.getElementById('dataStats');
+            const stats = [
+                { value: data.brands, label: 'Thương hiệu', color: 'primary' },
+                { value: data.categories, label: 'Danh mục', color: 'success' },
+                { value: data.users, label: 'Người dùng', color: 'info' },
+                { value: data.products, label: 'Sản phẩm', color: 'warning' },
+                { value: data.promotions, label: 'Khuyến mãi', color: 'secondary' },
+                { value: data.sales, label: 'Giao dịch', color: 'dark' }
+            ];
+
+            let html = '';
+            stats.forEach(stat => {
+                html += `
+                    <div class="col-md-2">
+                        <div class="text-center">
+                            <div class="h3 text-${stat.color}">${stat.value}</div>
+                            <div class="text-muted">${stat.label}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            statsContainer.innerHTML = html;
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 
+                              type === 'warning' ? 'alert-warning' : 'alert-danger';
+            
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <span>${message}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            // Remove existing alerts
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
+            
+            // Add new alert
+            document.querySelector('.container-fluid').insertAdjacentHTML('afterbegin', alertHtml);
+            
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                const alert = document.querySelector('.alert');
+                if (alert) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
+
+        // Test promotion update
+        function testPromotionUpdate() {
+            if (confirm('Bạn có chắc muốn test Promotion Update? Điều này sẽ trigger scheduled task và ghi logs.')) {
+                fetch('/admin/test/promotion-update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showAlert('success', '✅ Test promotion update completed. Check logs for details.');
+                        refreshStats();
+                    } else {
+                        showAlert('error', '❌ Error testing promotion update');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('error', '❌ Error testing promotion update: ' + error.message);
+                });
+            }
+        }
+
+        // Test daily maintenance
+        function testDailyMaintenance() {
+            if (confirm('Bạn có chắc muốn test Daily Maintenance? Điều này sẽ trigger scheduled task và ghi logs.')) {
+                fetch('/admin/test/daily-maintenance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        showAlert('success', '✅ Test daily maintenance completed. Check logs for details.');
+                        refreshStats();
+                    } else {
+                        showAlert('error', '❌ Error testing daily maintenance');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('error', '❌ Error testing daily maintenance: ' + error.message);
+                });
+            }
+        }
+
+        // Auto refresh stats every 30 seconds
+        setInterval(refreshStats, 30000);
+    </script>
+</body>
+</html>

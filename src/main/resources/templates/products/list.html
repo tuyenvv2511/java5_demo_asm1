@@ -1,21 +1,24 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" th:replace="~{layout :: layout(content=~{::section})}">
 <section th:fragment="content">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="mb-1" th:text="#{nav.products}">Products</h2>
-            <p class="text-muted mb-0" th:text="#{product.explore}">Khám phá các sản phẩm sưu tầm độc đáo</p>
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-1">🛍️ <span th:text="#{nav.products}">Products</span></h2>
+                <p class="text-muted mb-0" th:text="#{product.explore}">Khám phá các sản phẩm sưu tầm độc đáo với giá tốt nhất</p>
+            </div>
+            <!-- Create button only for SELLER -->
+            <div>
+                <a class="btn btn-primary btn-lg" th:href="@{/products/create}" sec:authorize="hasRole('SELLER')">
+                    <i class="fas fa-plus me-2"></i><span th:text="#{btn.create}">Create</span>
+                </a>
+            </div>
         </div>
-        <!-- Create button only for SELLER -->
-        <a class="btn btn-success" th:href="@{/products/create}" sec:authorize="hasRole('SELLER')">
-            <i class="fas fa-plus me-2"></i><span th:text="#{btn.create}">Create</span>
-        </a>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <form class="row g-3">
-                <div class="col-md-3">
+    <div class="filter-section">
+        <form class="row g-3">
+                <div class="col-md-2">
                     <label class="form-label"><i class="fas fa-tags me-1"></i>[[#{filter.brand}]]</label>
                     <select name="brand" class="form-select">
                         <option value="" th:text="#{filter.all.brands}">Tất cả thương hiệu</option>
@@ -23,7 +26,7 @@
                                 th:selected="${brand == b.slug}"></option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label"><i class="fas fa-list me-1"></i>[[#{filter.category}]]</label>
                     <select name="category" class="form-select">
                         <option value="" th:text="#{filter.all.categories}">Tất cả danh mục</option>
@@ -31,7 +34,15 @@
                                 th:selected="${category == c.slug}"></option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-2">
+                    <label class="form-label"><i class="fas fa-dollar-sign me-1"></i>Giá từ</label>
+                    <input type="number" min="0" step="1000" class="form-control" name="minPrice" th:value="${minPrice}" placeholder="0">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label"><i class="fas fa-dollar-sign me-1"></i>Giá đến</label>
+                    <input type="number" min="0" step="1000" class="form-control" name="maxPrice" th:value="${maxPrice}" placeholder="∞">
+                </div>
+                <div class="col-md-2">
                     <label class="form-label"><i class="fas fa-search me-1"></i>[[#{search.placeholder}]]</label>
                     <input class="form-control" name="q" th:value="${q}" th:placeholder="#{search.placeholder}">
                 </div>
@@ -40,17 +51,34 @@
                         <i class="fas fa-filter me-1"></i>Filter
                     </button>
                 </div>
-            </form>
-        </div>
+        </form>
     </div>
 
     <div class="table-responsive">
         <table class="table table-striped table-hover bg-white shadow-sm">
             <thead>
             <tr>
-                <th th:text="#{product.id}">ID</th>
-                <th th:text="#{product.title}">Title</th>
-                <th th:text="#{product.price}">Price</th>
+                <th>
+                    <a href="#" onclick="sortBy('id'); return false;" class="text-decoration-none">
+                        <span th:text="#{product.id}">ID</span>
+                        <i th:if="${sortBy == 'id'}" th:class="(${sortDir == 'asc'}) ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                        <i th:unless="${sortBy == 'id'}" class="fas fa-sort text-muted"></i>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" onclick="sortBy('title'); return false;" class="text-decoration-none">
+                        <span th:text="#{product.title}">Title</span>
+                        <i th:if="${sortBy == 'title'}" th:class="(${sortDir == 'asc'}) ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                        <i th:unless="${sortBy == 'title'}" class="fas fa-sort text-muted"></i>
+                    </a>
+                </th>
+                <th>
+                    <a href="#" onclick="sortBy('price'); return false;" class="text-decoration-none">
+                        <span th:text="#{product.price}">Price</span>
+                        <i th:if="${sortBy == 'price'}" th:class="(${sortDir == 'asc'}) ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+                        <i th:unless="${sortBy == 'price'}" class="fas fa-sort text-muted"></i>
+                    </a>
+                </th>
                 <th th:text="#{product.condition}">Condition</th>
                 <th th:text="#{product.brand}">Brand</th>
                 <th th:text="#{product.category}">Category</th>
@@ -77,20 +105,20 @@
                         </div>
                         <div class="flex-grow-1">
                             <h6 class="mb-1 fw-semibold" th:text="${p.title}">Title</h6>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a class="btn btn-sm btn-outline-primary"
+                            <div class="action-buttons">
+                                <a class="btn-action btn-chat"
                                    th:attr="data-product-id=${p.id}, data-title=${p.title}"
                                    onclick="openChat(this)">
-                                    <i class="fas fa-comments me-1"></i>[[#{chat.join}]]
+                                    <i class="fas fa-comments"></i><span th:text="#{chat.join}">Chat</span>
                                 </a>
                                 <!-- Buy button only for BUYER role -->
                                 <a th:if="${p.active}" sec:authorize="hasRole('BUYER')"
                                    th:href="@{/orders/buy/{id}(id=${p.id})}" 
-                                   class="btn btn-sm btn-success">
-                                    <i class="fas fa-shopping-cart me-1"></i><span th:text="#{product.buyNow}">Buy Now</span>
+                                   class="btn-action btn-buy">
+                                    <i class="fas fa-shopping-cart"></i><span th:text="#{product.buyNow}">Mua ngay</span>
                                 </a>
                                 <span th:unless="${p.active}" 
-                                      class="badge bg-secondary" th:text="#{product.sold}">Sold</span>
+                                      class="badge bg-secondary" th:text="#{product.sold}">Đã bán</span>
                                 <!-- Show login prompt for non-buyers -->
                                 <small th:if="${p.active}" sec:authorize="!hasRole('BUYER')"
                                        class="text-muted" th:text="#{product.login.buyer.prompt}">Đăng nhập với tài khoản BUYER để mua</small>
@@ -99,22 +127,22 @@
                     </div>
                 </td>
                 <td>
-                    <div th:if="${p.hasActivePromotion()}" class="text-end">
-                        <div class="text-decoration-line-through text-muted small mb-1" 
+                    <div th:if="${p.hasActivePromotion()}" class="price-display">
+                        <div class="price-original" 
                              th:text="${#numbers.formatInteger(p.price,3,'POINT')} + ' ₫'">4,200,000 ₫</div>
-                        <div class="text-danger fw-bold fs-6" 
+                        <div class="price-current" 
                              th:text="${#numbers.formatInteger(p.discountedPrice,3,'POINT')} + ' ₫'">3,500,000 ₫</div>
-                        <span class="badge bg-danger small">Sale</span>
+                        <span class="price-sale-badge">Sale</span>
                     </div>
-                    <div th:unless="${p.hasActivePromotion()}" class="text-end">
-                        <div class="fw-bold text-dark fs-6" 
+                    <div th:unless="${p.hasActivePromotion()}" class="price-display">
+                        <div class="price-current" 
                              th:text="${#numbers.formatInteger(p.price,3,'POINT')} + ' ₫'">4,200,000 ₫</div>
                     </div>
                 </td>
                 <td th:text="#{'condition.' + ${p.conditionGrade}}">LIKE_NEW</td>
-                <td th:text="${p.brand != null ? p.brand.name : '-'}">Nike</td>
-                <td th:text="${p.category != null ? p.category.name : '-'}">Sneaker</td>
-                <td th:text="${p.seller != null ? p.seller.username : '-'}">Seller</td>
+                <td th:text="${p.brand != null} ? ${p.brand.name} : '-'">Nike</td>
+                <td th:text="${p.category != null} ? ${p.category.name} : '-'">Sneaker</td>
+                <td th:text="${p.seller != null} ? ${p.seller.username} : '-'">Seller</td>
                 <td>
                     <span class="badge bg-warning" th:text="#{product.pending}">Pending</span>
                 </td>
@@ -158,11 +186,71 @@
     </div>
 </div>
 
+<!-- Pagination -->
+<div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-4">
+    <div class="text-muted">
+        Hiển thị <span th:text="${currentPage * pageSize + 1}">1</span> - 
+        <span th:text="${(currentPage + 1) * pageSize > totalElements} ? ${totalElements} : ${(currentPage + 1) * pageSize}">10</span> 
+        trong tổng số <span th:text="${totalElements}">100</span> sản phẩm
+    </div>
+    
+    <nav>
+        <ul class="pagination pagination-sm mb-0">
+            <!-- Previous button -->
+            <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled'">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage - 1}); return false;">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </li>
+            
+            <!-- Page numbers -->
+            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                class="page-item" 
+                th:classappend="${i == currentPage} ? 'active'">
+                <a class="page-link" href="#" th:attr="onclick='goToPage(' + ${i} + '); return false;'" th:text="${i + 1}">1</a>
+            </li>
+            
+            <!-- Next button -->
+            <li class="page-item" th:classappend="${!hasNext} ? 'disabled'">
+                <a class="page-link" href="#" onclick="goToPage(${currentPage + 1}); return false;">
+                    <i class="fas fa-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 <script>
     let stompClient = null, currentProductId = null;
+    
+    // Pagination function
+    function goToPage(page) {
+        const url = new URL(window.location);
+        url.searchParams.set('page', page);
+        window.location.href = url.toString();
+    }
+    
+    // Sorting function
+    function sortBy(sortBy) {
+        const url = new URL(window.location);
+        const currentSortBy = url.searchParams.get('sortBy') || 'id';
+        const currentSortDir = url.searchParams.get('sortDir') || 'asc';
+        
+        if (currentSortBy === sortBy) {
+            // Toggle direction
+            url.searchParams.set('sortDir', currentSortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            // New column, default to asc
+            url.searchParams.set('sortDir', 'asc');
+        }
+        
+        url.searchParams.set('sortBy', sortBy);
+        url.searchParams.set('page', '0'); // Reset to first page
+        window.location.href = url.toString();
+    }
 
     function connectWs(pid) {
         const socket = new SockJS('/ws');

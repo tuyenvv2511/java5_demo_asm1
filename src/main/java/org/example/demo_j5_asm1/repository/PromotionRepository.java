@@ -30,4 +30,17 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     @Query("SELECT COUNT(p) FROM Promotion p WHERE p.active = true " +
            "AND p.startDate <= :now AND p.endDate >= :now")
     long countActivePromotions(@Param("now") LocalDateTime now);
+    
+    // Tìm khuyến mãi sắp bắt đầu (để kích hoạt)
+    @Query("SELECT p FROM Promotion p WHERE p.active = false " +
+           "AND p.startDate <= :now AND p.endDate > :now")
+    List<Promotion> findUpcomingPromotions(@Param("now") LocalDateTime now);
+    
+    // Tìm khuyến mãi đã hết hạn (để vô hiệu hóa)
+    @Query("SELECT p FROM Promotion p WHERE p.active = true " +
+           "AND p.endDate < :now")
+    List<Promotion> findExpiredPromotions(@Param("now") LocalDateTime now);
+    
+    // Đếm khuyến mãi theo trạng thái active
+    long countByActiveTrue();
 }

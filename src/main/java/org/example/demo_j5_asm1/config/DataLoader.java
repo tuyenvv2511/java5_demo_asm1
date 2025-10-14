@@ -20,11 +20,13 @@ import org.example.demo_j5_asm1.service.SampleImageService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+@Transactional
 public class DataLoader implements CommandLineRunner {
     private final BrandRepository brandRepo;
     private final CategoryRepository categoryRepo;
@@ -61,6 +63,9 @@ public class DataLoader implements CommandLineRunner {
         
         // Cập nhật ảnh cho các sản phẩm mới (luôn chạy)
         updateProductImages();
+        
+        // Tạo thêm sản phẩm mẫu để test pagination
+        createSampleProductsForPagination();
     }
 
     private void loadBrands() {
@@ -1565,5 +1570,65 @@ public class DataLoader implements CommandLineRunner {
         }
         
         System.out.println("Updated images for " + allProducts.size() + " products");
+    }
+    
+    private void createSampleProductsForPagination() {
+        // Chỉ tạo thêm sản phẩm nếu tổng số sản phẩm < 150
+        if (productRepo.count() >= 150) {
+            return;
+        }
+        
+        var nike = brandRepo.findBySlug("nike").orElseThrow();
+        var adidas = brandRepo.findBySlug("adidas").orElseThrow();
+        var puma = brandRepo.findBySlug("puma").orElseThrow();
+        var vans = brandRepo.findBySlug("vans").orElseThrow();
+        var newBalance = brandRepo.findBySlug("new-balance").orElseThrow();
+        
+        var sneaker = categoryRepo.findBySlug("sneaker").orElseThrow();
+        
+        var seller1 = userRepo.findByUsername("seller1").orElseThrow();
+        var trader = userRepo.findByUsername("trader").orElseThrow();
+        
+        // Tạo 100 sản phẩm mẫu với giá khác nhau để test sorting và filtering
+        String[] sneakerModels = {
+            "Air Max", "Air Force", "Blazer", "Cortez", "Pegasus", "React", "VaporMax", 
+            "ZoomX", "Free", "Roshe", "Kyrie", "LeBron", "KD", "PG", "Freak"
+        };
+        
+        String[] adidasModels = {
+            "Ultraboost", "NMD", "Stan Smith", "Superstar", "Gazelle", "Samba", 
+            "Forum", "Campus", "Retropy", "Ozelia", "ZX", "Continental", "Ozweego"
+        };
+        
+        String[] colors = {"Black", "White", "Red", "Blue", "Green", "Yellow", "Orange", "Purple", "Pink", "Gray"};
+        String[] sizes = {"7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12"};
+        
+        for (int i = 1; i <= 100; i++) {
+            String model = i % 2 == 0 ? sneakerModels[i % sneakerModels.length] : adidasModels[i % adidasModels.length];
+            String color = colors[i % colors.length];
+            String size = sizes[i % sizes.length];
+            String brandName = i % 2 == 0 ? "Nike" : (i % 3 == 0 ? "Adidas" : (i % 4 == 0 ? "Puma" : (i % 5 == 0 ? "Vans" : "New Balance")));
+            
+            var brand = i % 2 == 0 ? nike : (i % 3 == 0 ? adidas : (i % 4 == 0 ? puma : (i % 5 == 0 ? vans : newBalance)));
+            var seller = i % 2 == 0 ? seller1 : trader;
+            
+            // Tạo giá ngẫu nhiên từ 500k đến 5M
+            BigDecimal price = new BigDecimal(500000 + (Math.random() * 4500000));
+            price = price.setScale(0, java.math.RoundingMode.HALF_UP);
+            
+            productRepo.save(Product.builder()
+                    .title(brandName + " " + model + " " + color + " Size " + size)
+                    .description("Authentic " + brandName + " " + model + " sneaker in " + color + " color, size " + size + ". Perfect condition, never worn.")
+                    .price(price)
+                    .brand(brand)
+                    .category(sneaker)
+                    .seller(seller)
+                    .conditionGrade(Condition.LIKE_NEW)
+                    .active(true)
+                    .createdAt(LocalDateTime.now().minusDays(i % 30))
+                    .build());
+        }
+        
+        System.out.println("Created 100 sample products for pagination testing");
     }
 }
